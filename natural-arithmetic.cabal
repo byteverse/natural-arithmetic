@@ -42,6 +42,16 @@ description:
   Consequently, we only provide a single `plus` function, and users
   must use `Arithmetic.Plus.commutative` to further manipulate the
   inequality.
+  .
+  Here are the proof-manipulation vocabulary used by this library.
+  Many of these terms are not standard, but we try to be consistent
+  in this library:
+  .
+  * Weaken: Increase an upper bound without changing the bounded value
+  .
+  * Increment: Increase an upper bound along with the bounded value
+  .
+  * Substitute: Replace a number with an equal number
 bug-reports: https://github.com/andrewthad/natural-arithmetic
 license: BSD-3-Clause
 license-file: LICENSE

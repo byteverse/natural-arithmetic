@@ -14,8 +14,8 @@ module Arithmetic.Fin
   , descending
   , slice
     -- * Modification
-  , shiftL
-  , shiftR
+  , incrementL
+  , incrementR
   , weakenL
   , weakenR
     -- * Absurdities
@@ -43,13 +43,13 @@ last n !pf = Fin (Nat (getNat n - 1)) pf
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the right-hand side of @n@.
-shiftR :: forall n m. Nat m -> Fin n -> Fin (n + m)
-shiftR m (Fin i pf) = Fin (Nat.plus i m) (Lt.incrementR @m pf)
+incrementR :: forall n m. Nat m -> Fin n -> Fin (n + m)
+incrementR m (Fin i pf) = Fin (Nat.plus i m) (Lt.incrementR @m pf)
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the left-hand side of @n@.
-shiftL :: forall n m. Nat m -> Fin n -> Fin (m + n)
-shiftL m (Fin i pf) = Fin (Nat.plus m i) (Lt.incrementL @m pf)
+incrementL :: forall n m. Nat m -> Fin n -> Fin (m + n)
+incrementL m (Fin i pf) = Fin (Nat.plus m i) (Lt.incrementL @m pf)
 
 -- | Weaken the bound by one. This does not change the index.
 weakenL :: forall n m. Fin n -> Fin (m + n)

@@ -28,7 +28,7 @@ module Arithmetic.Nat
 import Prelude hiding (succ)
 
 import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
-import Arithmetic.Unsafe ((:=:)(Equal), type (<=)(Lte))
+import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
 import GHC.Exts (Proxy#,proxy#)
 import GHC.TypeNats (type (+),KnownNat,natVal')
 
@@ -61,7 +61,7 @@ testLessThanEqual (Nat x) (Nat y) = if x <= y
 -- | Are the two arguments equal to one another?
 testEqual :: Nat a -> Nat b -> Maybe (a :=: b)
 testEqual (Nat x) (Nat y) = if x == y
-  then Just Equal
+  then Just Eq
   else Nothing
 
 -- | Add two numbers.

@@ -9,7 +9,7 @@ module Arithmetic.Unsafe
   ( Nat(..)
   , type (<)(Lt)
   , type (<=)(Lte)
-  , type (:=:)(Equal)
+  , type (:=:)(Eq)
   ) where
 
 import Prelude hiding ((>=),(<=))
@@ -39,12 +39,12 @@ data (<=) :: GHC.Nat -> GHC.Nat -> Type where
   Lte :: a <= b
 
 data (:=:) :: GHC.Nat -> GHC.Nat -> Type where
-  Equal :: a :=: b
+  Eq :: a :=: b
 
 instance Category (<=) where
   id = Lte
   Lte . Lte = Lte
 
 instance Category (:=:) where
-  id = Equal
-  Equal . Equal = Equal
+  id = Eq
+  Eq . Eq = Eq

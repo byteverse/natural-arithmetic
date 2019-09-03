@@ -17,7 +17,7 @@ module Arithmetic.Lt
   , plus
   , transitive
     -- * Absurdities
-  , lessThanZeroAbsurd
+  , absurd
     -- * Integration with GHC solver
   , constant
   ) where
@@ -62,8 +62,8 @@ zero :: 0 < 1
 zero = Lt
 
 -- | Nothing is less than zero.
-lessThanZeroAbsurd :: n < 0 -> void
-lessThanZeroAbsurd Lt = error "Arithmetic.Nat.lessThanZeroAbsurd: n < 0"
+absurd :: n < 0 -> void
+absurd Lt = error "Arithmetic.Nat.absurd: n < 0"
 
 -- | Use GHC's built-in type-level arithmetic to prove
 -- that one number is less than another. The type-checker

@@ -19,7 +19,7 @@ module Arithmetic.Fin
   , weakenL
   , weakenR
     -- * Absurdities
-  , finZeroAbsurd
+  , absurd
     -- * Demote
   , demote
   ) where
@@ -63,9 +63,9 @@ weakenL (Fin i pf) = Fin i
 weakenR :: forall n m. Fin n -> Fin (n + m)
 weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
 
--- | A finite set of no values is impossible
-finZeroAbsurd :: Fin 0 -> void
-finZeroAbsurd (Fin _ pf) = Lt.lessThanZeroAbsurd pf
+-- | A finite set of no values is impossible.
+absurd :: Fin 0 -> void
+absurd (Fin _ pf) = Lt.absurd pf
 
 -- | Generate all values of a finite set in ascending order
 -- >>> ascending (Nat.constant @3) (Lt.constant @3)

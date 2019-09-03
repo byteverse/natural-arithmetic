@@ -16,6 +16,8 @@ module Arithmetic.Lt
     -- * Composition of Inequalities
   , plus
   , transitive
+    -- * Absurdities
+  , lessThanZeroAbsurd
     -- * Integration with GHC solver
   , constant
   ) where
@@ -58,6 +60,10 @@ transitive Lt Lt = Lt
 -- | Zero is less than one.
 zero :: 0 < 1
 zero = Lt
+
+-- | Nothing is less than zero.
+lessThanZeroAbsurd :: n < 0 -> void
+lessThanZeroAbsurd Lt = error "Arithmetic.Nat.lessThanZeroAbsurd: n < 0"
 
 -- | Use GHC's built-in type-level arithmetic to prove
 -- that one number is less than another. The type-checker

@@ -4,7 +4,7 @@
 {-# language ExplicitForAll #-}
 {-# language AllowAmbiguousTypes #-}
 
-module Data.Arithmetic.Plus
+module Arithmetic.Plus
   ( zeroL
   , zeroR
   , commutative
@@ -13,7 +13,6 @@ module Data.Arithmetic.Plus
 
 import Arithmetic.Unsafe (type (:=:)(Equal))
 import GHC.TypeNats (type (+))
-import qualified GHC.TypeNats as GHC
 
 -- | Any number plus zero is equal to the original number.
 zeroR :: m :=: (m + 0)

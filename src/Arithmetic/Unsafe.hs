@@ -14,7 +14,6 @@ module Arithmetic.Unsafe
 
 import Prelude hiding ((>=),(<=))
 import Data.Kind (Type)
-import GHC.TypeNats (type (+))
 import Control.Category (Category)
 import qualified Control.Category
 import qualified GHC.TypeNats as GHC

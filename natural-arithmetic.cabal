@@ -21,6 +21,7 @@ extra-source-files: CHANGELOG.md
 
 library
   exposed-modules:
+    Arithmetic.Fin
     Arithmetic.Equal
     Arithmetic.Lt
     Arithmetic.Lte

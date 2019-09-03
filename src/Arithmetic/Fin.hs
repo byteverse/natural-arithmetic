@@ -14,10 +14,10 @@ module Arithmetic.Fin
   , descending
   , slice
     -- * Modification
-  , raise
-  , raiseN
-  , weaken
-  , weakenN
+  , shiftL
+  , shiftR
+  , weakenL
+  , weakenR
     -- * Absurdities
   , finZeroAbsurd
     -- * Demote
@@ -31,31 +31,37 @@ import Arithmetic.Types (Fin(..))
 import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Lt as Lt
 import qualified Arithmetic.Lte as Lte
+import qualified Arithmetic.Plus as Plus
 
 -- | The smallest member of a finite set
-zero :: Nat n -> 0 < n -> Fin n
-zero _ !pf = Fin Nat.zero pf
+zero :: 0 < n -> Fin n
+zero !pf = Fin Nat.zero pf
 
 -- | The largest member of a finite set
 last :: Nat n -> 0 < n -> Fin n
 last n !pf = Fin (Nat (getNat n - 1)) pf
 
--- | Raise the index by one and weaken the bound by one.
-raise :: Fin n -> Fin (n + 1)
-raise = raiseN Nat.one
+-- | Raise the index by @m@ and weaken the bound by @m@, adding
+-- @m@ to the right-hand side of @n@.
+shiftR :: forall n m. Nat m -> Fin n -> Fin (n + m)
+shiftR m (Fin i pf) = Fin (Nat.plus i m) (Lt.incrementR @m pf)
 
--- | Raise the index by 'm' and weaken the bound by 'm'.
--- 'raise Nat.one == raise'
-raiseN :: forall n m. Nat m -> Fin n -> Fin (n + m)
-raiseN m (Fin i pf) = Fin (Nat.plus i m) (Lt.plus pf Lte.reflexive)
+-- | Raise the index by @m@ and weaken the bound by @m@, adding
+-- @m@ to the left-hand side of @n@.
+shiftL :: forall n m. Nat m -> Fin n -> Fin (m + n)
+shiftL m (Fin i pf) = Fin (Nat.plus m i) (Lt.incrementL @m pf)
 
 -- | Weaken the bound by one. This does not change the index.
-weaken :: forall n m. Fin n -> Fin (n + m)
-weaken (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
+weakenL :: forall n m. Fin n -> Fin (m + n)
+weakenL (Fin i pf) = Fin i
+  ( Lt.substituteR
+    (Plus.commutative @n @m)
+    (Lt.plus pf (Lte.zero @m))
+  )
 
--- | Weaken the bound by 'm'. This does not change the index.
-weakenN :: forall n m. Fin n -> Fin (n + m)
-weakenN (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
+-- side of @n@. This does not change the index.
+weakenR :: forall n m. Fin n -> Fin (n + m)
+weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
 
 -- | A finite set of no values is impossible
 finZeroAbsurd :: Fin 0 -> void

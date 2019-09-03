@@ -87,12 +87,12 @@ descending n !_ = go (getNat n - 1)
 -- >>> slice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
 -- [2, 3, 4]
 slice :: forall n offset len. Nat offset -> Nat len -> offset + len < n -> [Fin n]
-slice offset len !_ = go 0
+slice offset len !_ = go (getNat offset)
   where
     go :: Int -> [Fin n]
     go !m
-      | m == getNat len = []
-      | otherwise = Fin (Nat (m + getNat offset)) Lt : go (m + 1)
+      | m == getNat offset + getNat len = []
+      | otherwise = Fin (Nat m) Lt : go (m + 1)
 
 -- | Extract the 'Int' from a 'Fin n'. This is intended to be used
 -- at a boundary where a safe interface meets the unsafe primitives

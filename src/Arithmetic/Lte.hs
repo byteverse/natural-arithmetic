@@ -14,6 +14,9 @@ module Arithmetic.Lte
     -- * Increment
   , incrementL
   , incrementR
+    -- * Decrement
+  , decrementL
+  , decrementR
     -- * Weaken
   , weakenL
   , weakenR
@@ -33,13 +36,13 @@ import qualified GHC.TypeNats as GHC
 
 -- | Replace the right-hand side of a strict inequality
 -- with an equal number.
-substituteL :: (b :=: c) -> (a < b) -> (a < c)
-substituteL Eq Lt = Lt
+substituteL :: (b :=: c) -> (a <= b) -> (a <= c)
+substituteL Eq Lte = Lte
 
 -- | Replace the right-hand side of a strict inequality
 -- with an equal number.
-substituteR :: (b :=: c) -> (a < b) -> (a < c)
-substituteR Eq Lt = Lt
+substituteR :: (b :=: c) -> (a <= b) -> (a <= c)
+substituteR Eq Lte = Lte
 
 -- | Add two inequalities.
 plus :: (a <= b) -> (c <= d) -> (a + c <= b + d)
@@ -76,6 +79,18 @@ weakenL Lte = Lte
 weakenR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
   (a <= b) -> (a <= b + c)
 weakenR Lte = Lte
+
+-- | Subtract a constant from the left-hand side of both sides of
+-- the inequality. This is the opposite of 'incrementL'.
+decrementL :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (c + a <= c + b) -> (a <= b)
+decrementL Lte = Lte
+
+-- | Subtract a constant from the right-hand side of both sides of
+-- the inequality. This is the opposite of 'incrementR'.
+decrementR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (a + c <= b + c) -> (a <= b)
+decrementR Lte = Lte
 
 -- | Weaken a strict inequality to a non-strict inequality.
 fromStrict :: (a < b) -> (a <= b)

@@ -19,7 +19,7 @@ zeroR :: m :=: (m + 0)
 zeroR = Eq
 
 -- | Zero plus any number is equal to the original number.
-zeroL :: m :=: (m + 0)
+zeroL :: m :=: (0 + m)
 zeroL = Eq
 
 -- | Addition is commutative.

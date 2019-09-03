@@ -7,17 +7,15 @@
 {-# language TypeApplications #-}
 {-# language ExplicitNamespaces #-}
 module Arithmetic.Fin
-  ( -- * Construction
-    zero
-  , last
-  , ascending
-  , descending
-  , slice
-    -- * Modification
-  , incrementL
+  ( -- * Modification
+    incrementL
   , incrementR
   , weakenL
   , weakenR
+    -- * Traverse
+  , ascending
+  , descending
+  , slice
     -- * Absurdities
   , absurd
     -- * Demote
@@ -26,20 +24,12 @@ module Arithmetic.Fin
 
 import Prelude hiding (last)
 import GHC.TypeNats (type (+))
-import Arithmetic.Unsafe (Nat(..), type (<)(Lt))
-import Arithmetic.Types (Fin(..))
+import Arithmetic.Nat ((<?))
+import Arithmetic.Types (Fin(..),Difference(..),Nat,type (<), type (<=), type (:=:))
 import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Lt as Lt
 import qualified Arithmetic.Lte as Lte
 import qualified Arithmetic.Plus as Plus
-
--- | The smallest member of a finite set
-zero :: 0 < n -> Fin n
-zero !pf = Fin Nat.zero pf
-
--- | The largest member of a finite set
-last :: Nat n -> 0 < n -> Fin n
-last n !pf = Fin (Nat (getNat n - 1)) pf
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the right-hand side of @n@.
@@ -67,38 +57,57 @@ weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
 absurd :: Fin 0 -> void
 absurd (Fin _ pf) = Lt.absurd pf
 
--- | Generate all values of a finite set in ascending order
--- >>> ascending (Nat.constant @3) (Lt.constant @3)
+-- | Generate all values of a finite set in ascending order.
+--
+-- >>> ascending (Nat.constant @3)
 -- [0, 1, 2]
-ascending :: forall n. Nat n -> 0 < n -> [Fin n]
-ascending n !_ = go 0
+ascending :: forall n. Nat n -> [Fin n]
+ascending !n = go Nat.zero
   where
-    go :: Int -> [Fin n]
-    go !m
-      | getNat n == m = []
-      | otherwise = Fin (Nat m) Lt : go (m + 1)
+    go :: Nat m -> [Fin n]
+    go !m = case m <? n of
+      Nothing -> []
+      Just lt -> Fin m lt : go (Nat.succ m)
 
--- | Generate all values of a finite set in descending order
--- >>> descending (Nat.constant @3) (Lt.constant @3)
+-- | Generate all values of a finite set in descending order.
+--
+-- >>> descending (Nat.constant @3)
 -- [2, 1, 0]
-descending :: forall n. Nat n -> 0 < n -> [Fin n]
-descending n !_ = go (getNat n - 1)
+descending :: forall n. Nat n -> [Fin n]
+descending n = go n Lte.reflexive
   where
-    go :: Int -> [Fin n]
-    go !m
-      | m < 0 = []
-      | otherwise = Fin (Nat m) Lt : go (m - 1)
+    go :: forall m. Nat m -> (m <= n) -> [Fin n]
+    go !m !lt = case Nat.monus m Nat.one of
+      Nothing -> []
+      Just (Difference mpred eq) -> go2 lt mpred eq
+    go2 :: forall m c. (m <= n) -> Nat c -> (c + 1 :=: m) -> [Fin n]
+    go2 !lt !c !eq = 
+        let ceeLtEm :: c < m
+            ceeLtEm = id
+              $ Lt.substituteR eq
+              $ Lt.substituteL Plus.zeroL
+              $ Lt.incrementL @c Lt.zero
+         in Fin c (Lt.transitiveNonstrictR ceeLtEm lt) : go c
+              (Lte.transitive (Lte.substituteR eq (Lte.weakenR @1 (Lte.reflexive @c))) lt)
 
--- | Generate 'len' values starting from 'offset'
+-- | Generate 'len' values starting from 'off'.
+--
 -- >>> slice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
 -- [2, 3, 4]
-slice :: forall n offset len. Nat offset -> Nat len -> offset + len < n -> [Fin n]
-slice offset len !_ = go 0
+slice :: forall n off len.
+     Nat off
+  -> Nat len
+  -> (off + len < n)
+  -> [Fin n]
+slice off len !offPlusLenLtEn = go Nat.zero
   where
-    go :: Int -> [Fin n]
-    go !m
-      | m == getNat len = []
-      | otherwise = Fin (Nat (m + getNat offset)) Lt : go (m + 1)
+    go :: Nat m -> [Fin n]
+    go !m = case m <? len of
+      Nothing -> []
+      Just emLtLen ->
+        let !offPlusEmLtOffPlusLen = Lt.incrementL @off emLtLen
+            !offPlusEmLtEn = Lt.transitive offPlusEmLtOffPlusLen offPlusLenLtEn
+         in Fin (Nat.plus off m) offPlusEmLtEn : go (Nat.succ m)
 
 -- | Extract the 'Int' from a 'Fin n'. This is intended to be used
 -- at a boundary where a safe interface meets the unsafe primitives

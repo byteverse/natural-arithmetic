@@ -19,6 +19,8 @@ module Arithmetic.Lt
     -- * Composition
   , plus
   , transitive
+  , transitiveNonstrictL
+  , transitiveNonstrictR
     -- * Absurdities
   , absurd
     -- * Integration with GHC solver
@@ -71,6 +73,14 @@ weakenR Lt = Lt
 -- | Compose two strict inequalities using transitivity.
 transitive :: (a < b) -> (b < c) -> (a < c)
 transitive Lt Lt = Lt
+
+-- | Compose a strict inequality (the first argument) with a nonstrict
+-- inequality (the second argument).
+transitiveNonstrictR :: (a < b) -> (b <= c) -> (a < c)
+transitiveNonstrictR Lt Lte = Lt
+
+transitiveNonstrictL :: (a <= b) -> (b < c) -> (a < c)
+transitiveNonstrictL Lte Lt = Lt
 
 -- | Zero is less than one.
 zero :: 0 < 1

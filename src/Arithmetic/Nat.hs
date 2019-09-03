@@ -8,6 +8,8 @@
 module Arithmetic.Nat
   ( -- * Addition
     plus
+    -- * Subtraction
+  , monus
     -- * Successor
   , succ
     -- * Compare
@@ -29,6 +31,7 @@ import Prelude hiding (succ)
 
 import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
 import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
+import Arithmetic.Types
 import GHC.Exts (Proxy#,proxy#)
 import GHC.TypeNats (type (+),KnownNat,natVal')
 
@@ -71,6 +74,13 @@ plus (Nat x) (Nat y) = Nat (x + y)
 -- | The successor of a number.
 succ :: Nat a -> Nat (a + 1)
 succ n = plus n one
+
+-- | Subtract the second argument from the first argument.
+monus :: Nat a -> Nat b -> Maybe (Difference a b)
+{-# inline monus #-}
+monus (Nat a) (Nat b) = let c = a - b in if c >= 0
+  then Just (Difference (Nat c) Eq)
+  else Nothing
 
 -- | The number zero.
 zero :: Nat 0

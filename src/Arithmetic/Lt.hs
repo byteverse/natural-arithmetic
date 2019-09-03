@@ -5,15 +5,18 @@
 {-# language TypeFamilies #-}
 
 module Arithmetic.Lt
-  ( -- * Identity
+  ( -- * Special Inequalities
     zero
     -- * Substitution
   , substituteL
   , substituteR
-    -- * Congruence
+    -- * Increment
   , incrementL
   , incrementR
-    -- * Composition of Inequalities
+    -- * Weaken
+  , weakenL
+  , weakenR
+    -- * Composition
   , plus
   , transitive
     -- * Absurdities
@@ -52,6 +55,18 @@ incrementL Lt = Lt
 incrementR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
   (a < b) -> (a + c < b + c)
 incrementR Lt = Lt
+
+-- | Add a constant to the left-hand side of the right-hand side of
+-- the strict inequality.
+weakenL :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (a < b) -> (a < c + b)
+weakenL Lt = Lt
+
+-- | Add a constant to the right-hand side of the right-hand side of
+-- the strict inequality.
+weakenR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (a < b) -> (a < b + c)
+weakenR Lt = Lt
 
 -- | Compose two strict inequalities using transitivity.
 transitive :: (a < b) -> (b < c) -> (a < c)

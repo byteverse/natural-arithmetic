@@ -5,14 +5,22 @@
 {-# language TypeOperators #-}
 
 module Arithmetic.Lte
-  ( transitive
-  , plus
-  , zero
+  ( -- * Special Inequalities
+    zero
+  , reflexive
+    -- * Substitution
   , substituteL
   , substituteR
+    -- * Increment
   , incrementL
   , incrementR
-  , reflexive
+    -- * Weaken
+  , weakenL
+  , weakenR
+    -- * Composition
+  , transitive
+  , plus
+    -- * Convert Strict Inequality
   , fromStrict
     -- * Integration with GHC solver
   , constant
@@ -57,13 +65,29 @@ incrementR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
   (a <= b) -> (a + c <= b + c)
 incrementR Lte = Lte
 
--- | Weaken a strict inequality.
+-- | Add a constant to the left-hand side of the right-hand side of
+-- the inequality.
+weakenL :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (a <= b) -> (a <= c + b)
+weakenL Lte = Lte
+
+-- | Add a constant to the right-hand side of the right-hand side of
+-- the inequality.
+weakenR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (a <= b) -> (a <= b + c)
+weakenR Lte = Lte
+
+-- | Weaken a strict inequality to a non-strict inequality.
 fromStrict :: (a < b) -> (a <= b)
 fromStrict Lt = Lte
 
+-- | Zero is less-than-or-equal-to any number.
 zero :: 0 <= a
 zero = Lte
 
+-- | Use GHC's built-in type-level arithmetic to prove
+-- that one number is less-than-or-equal-to another. The type-checker
+-- only reduces 'CmpNat' if both arguments are constants.
 constant :: forall a b. (IsLte (CmpNat a b) ~ 'True) => (a <= b)
 constant = Lte
 

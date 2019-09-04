@@ -15,6 +15,7 @@ module Arithmetic.Fin
     -- * Traverse
   , ascend
   , ascendM
+  , ascendM_
   , ascending
   , descending
   , slice
@@ -59,14 +60,18 @@ weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
 absurd :: Fin 0 -> void
 absurd (Fin _ pf) = Lt.absurd pf
 
--- | Strict fold over the numbers bounded by @n@
--- in ascending order. Roughly:
+-- | Strict fold over the numbers bounded by @n@ in ascending
+-- order. For convenince, this differs from @foldl'@ in the
+-- order of the parameters differs from @foldl@. Roughly:
 --
--- > ascend f 4 z = f 3 (f 2 (f 1 (f 0 z)))
+-- > ascend 4 z f = f 3 (f 2 (f 1 (f 0 z)))
 ascend :: forall a n.
-  (Fin n -> a -> a) -> a -> Nat n -> a
+     Nat n -- ^ Upper bound
+  -> a -- ^ Initial accumulator
+  -> (Fin n -> a -> a) -- ^ Update accumulator
+  -> a
 {-# inline ascend #-}
-ascend f !b0 !n = go Nat.zero b0
+ascend !n !b0 f = go Nat.zero b0
   where
   go :: Nat m -> a -> a
   go !m !b = case m <? n of
@@ -76,20 +81,39 @@ ascend f !b0 !n = go Nat.zero b0
 -- | Strict monadic left fold over the numbers bounded by @n@
 -- in ascending order. Roughly:
 --
--- > ascendM f 4 z =
+-- > ascendM 4 z f =
 -- >   f 0 z0 >>= \z1 ->
 -- >   f 1 z1 >>= \z2 ->
 -- >   f 2 z2 >>= \z3 ->
 -- >   f 3 z3
 ascendM :: forall m a n. Monad m
-  => (Fin n -> a -> m a) -> a -> Nat n -> m a
+  => Nat n -- ^ Upper bound
+  -> a -- ^ Initial accumulator
+  -> (Fin n -> a -> m a) -- ^ Update accumulator
+  -> m a
 {-# inline ascendM #-}
-ascendM f !b0 !n = go Nat.zero b0
+ascendM !n !b0 f = go Nat.zero b0
   where
   go :: Nat p -> a -> m a
   go !m !b = case m <? n of
     Nothing -> pure b
     Just lt -> go (Nat.succ m) =<< f (Fin m lt) b
+
+-- | Monadic traversal of the numbers bounded by @n@
+-- in ascending order.
+--
+-- > ascendM_ 4 f = f 0 *> f 1 *> f 2 *> f 3
+ascendM_ :: forall m a n. Applicative m
+  => Nat n -- ^ Upper bound
+  -> (Fin n -> m a) -- ^ Effectful interpretion
+  -> m ()
+{-# inline ascendM_ #-}
+ascendM_ !n f = go Nat.zero
+  where
+  go :: Nat p -> m ()
+  go !m = case m <? n of
+    Nothing -> pure ()
+    Just lt -> f (Fin m lt) *> go (Nat.succ m)
 
 -- | Generate all values of a finite set in ascending order.
 --

@@ -1,9 +1,9 @@
+{-# language DataKinds #-}
 {-# language ExplicitNamespaces #-}
 {-# language GADTs #-}
+{-# language KindSignatures #-}
 {-# language RankNTypes #-}
 {-# language TypeOperators #-}
-{-# language DataKinds #-}
-{-# language KindSignatures #-}
 
 module Arithmetic.Types
   ( Nat
@@ -14,10 +14,11 @@ module Arithmetic.Types
   , type (:=:)
   ) where
 
-import Data.Kind (type Type)
 import Arithmetic.Unsafe (Nat(getNat), type (<=))
 import Arithmetic.Unsafe (type (<), type (:=:))
+import Data.Kind (type Type)
 import GHC.TypeNats (type (+))
+
 import qualified GHC.TypeNats as GHC
 
 -- | A finite set of 'n' elements. 'Fin n = { 0 .. n - 1 }'

@@ -1,9 +1,9 @@
-{-# language RoleAnnotations #-}
 {-# language DataKinds #-}
+{-# language ExplicitNamespaces #-}
 {-# language GADTSyntax #-}
 {-# language KindSignatures #-}
+{-# language RoleAnnotations #-}
 {-# language TypeOperators #-}
-{-# language ExplicitNamespaces #-}
 
 module Arithmetic.Unsafe
   ( Nat(..)
@@ -13,8 +13,10 @@ module Arithmetic.Unsafe
   ) where
 
 import Prelude hiding ((>=),(<=))
-import Data.Kind (Type)
+
 import Control.Category (Category)
+import Data.Kind (Type)
+
 import qualified Control.Category
 import qualified GHC.TypeNats as GHC
 
@@ -22,7 +24,7 @@ import qualified GHC.TypeNats as GHC
 -- Using this library to implement length-indexed arrays
 -- or sized builders does not require importing this
 -- module to get the value out of the Nat data constructor.
--- Use Arithmetic.Nat.
+-- Use Arithmetic.Nat.demote for this purpose.
 
 infix 4 <
 infix 4 <=
@@ -32,12 +34,17 @@ infix 4 :=:
 newtype Nat (n :: GHC.Nat) = Nat { getNat :: Int }
 type role Nat nominal
 
+-- | Proof that the first argument is strictly less than the
+-- second argument.
 data (<) :: GHC.Nat -> GHC.Nat -> Type where
   Lt :: a < b
 
+-- | Proof that the first argument is less than or equal to the
+-- second argument.
 data (<=) :: GHC.Nat -> GHC.Nat -> Type where
   Lte :: a <= b
 
+-- | Proof that the first argument is equal to the second argument.
 data (:=:) :: GHC.Nat -> GHC.Nat -> Type where
   Eq :: a :=: b
 

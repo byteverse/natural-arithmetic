@@ -1,11 +1,11 @@
 {-# language BangPatterns #-}
 {-# language DataKinds #-}
-{-# language GADTs #-}
-{-# language ScopedTypeVariables #-}
-{-# language KindSignatures #-}
-{-# language TypeOperators #-}
-{-# language TypeApplications #-}
 {-# language ExplicitNamespaces #-}
+{-# language GADTs #-}
+{-# language KindSignatures #-}
+{-# language ScopedTypeVariables #-}
+{-# language TypeApplications #-}
+{-# language TypeOperators #-}
 module Arithmetic.Fin
   ( -- * Modification
     incrementL
@@ -26,12 +26,14 @@ module Arithmetic.Fin
   ) where
 
 import Prelude hiding (last)
-import GHC.TypeNats (type (+))
+
 import Arithmetic.Nat ((<?))
 import Arithmetic.Types (Fin(..),Difference(..),Nat,type (<), type (<=), type (:=:))
-import qualified Arithmetic.Nat as Nat
+import GHC.TypeNats (type (+))
+
 import qualified Arithmetic.Lt as Lt
 import qualified Arithmetic.Lte as Lte
+import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Plus as Plus
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding

@@ -1,8 +1,8 @@
 {-# language DataKinds #-}
-{-# language TypeOperators #-}
-{-# language KindSignatures #-}
 {-# language ExplicitForAll #-}
+{-# language KindSignatures #-}
 {-# language TypeFamilies #-}
+{-# language TypeOperators #-}
 
 module Arithmetic.Lt
   ( -- * Special Inequalities
@@ -30,6 +30,7 @@ module Arithmetic.Lt
 import Arithmetic.Unsafe (type (<)(Lt),type (:=:)(Eq))
 import Arithmetic.Unsafe (type (<=)(Lte))
 import GHC.TypeNats (CmpNat,type (+))
+
 import qualified GHC.TypeNats as GHC
 
 -- | Replace the right-hand side of a strict inequality

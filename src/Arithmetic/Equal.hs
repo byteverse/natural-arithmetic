@@ -1,7 +1,7 @@
 {-# language DataKinds #-}
-{-# language TypeOperators #-}
-{-# language KindSignatures #-}
 {-# language ExplicitForAll #-}
+{-# language KindSignatures #-}
+{-# language TypeOperators #-}
 
 module Arithmetic.Equal
   ( symmetric

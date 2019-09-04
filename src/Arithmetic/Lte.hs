@@ -32,6 +32,7 @@ module Arithmetic.Lte
 import Arithmetic.Unsafe (type (<)(Lt),type (:=:)(Eq))
 import Arithmetic.Unsafe (type (<=)(Lte))
 import GHC.TypeNats (CmpNat,type (+))
+
 import qualified GHC.TypeNats as GHC
 
 -- | Replace the right-hand side of a strict inequality

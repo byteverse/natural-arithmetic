@@ -1,9 +1,9 @@
 {-# language DataKinds #-}
-{-# language TypeOperators #-}
-{-# language KindSignatures #-}
 {-# language ExplicitForAll #-}
+{-# language KindSignatures #-}
 {-# language MagicHash #-}
 {-# language ScopedTypeVariables #-}
+{-# language TypeOperators #-}
 
 module Arithmetic.Nat
   ( -- * Addition
@@ -29,9 +29,9 @@ module Arithmetic.Nat
 
 import Prelude hiding (succ)
 
-import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
-import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
 import Arithmetic.Types
+import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
+import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
 import GHC.Exts (Proxy#,proxy#)
 import GHC.TypeNats (type (+),KnownNat,natVal')
 

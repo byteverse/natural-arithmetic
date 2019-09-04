@@ -18,7 +18,7 @@ module Arithmetic.Fin
   , ascendM_
   , ascending
   , descending
-  , slice
+  , ascendingSlice
     -- * Absurdities
   , absurd
     -- * Demote
@@ -152,12 +152,12 @@ descending n = go n Lte.reflexive
 --
 -- >>> slice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
 -- [2, 3, 4]
-slice :: forall n off len.
+ascendingSlice :: forall n off len.
      Nat off
   -> Nat len
   -> (off + len < n)
   -> [Fin n]
-slice off len !offPlusLenLtEn = go Nat.zero
+ascendingSlice off len !offPlusLenLtEn = go Nat.zero
   where
     go :: Nat m -> [Fin n]
     go !m = case m <? len of

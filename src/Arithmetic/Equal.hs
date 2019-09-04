@@ -1,7 +1,7 @@
 {-# language DataKinds #-}
-{-# language TypeOperators #-}
-{-# language KindSignatures #-}
 {-# language ExplicitForAll #-}
+{-# language KindSignatures #-}
+{-# language TypeOperators #-}
 
 module Arithmetic.Equal
   ( symmetric
@@ -9,14 +9,14 @@ module Arithmetic.Equal
   , plusL
   ) where
 
-import Arithmetic.Unsafe (type (:=:)(Equal))
+import Arithmetic.Unsafe (type (:=:)(Eq))
 import GHC.TypeNats (type (+))
 
 symmetric :: (m :=: n) -> (n :=: m)
-symmetric Equal = Equal
+symmetric Eq = Eq
 
 plusL :: forall c m n. (m :=: n) -> (c + m :=: c + n)
-plusL Equal = Equal
+plusL Eq = Eq
 
 plusR :: forall c m n. (m :=: n) -> (m + c :=: n + c)
-plusR Equal = Equal
+plusR Eq = Eq

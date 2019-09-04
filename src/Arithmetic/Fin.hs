@@ -152,21 +152,21 @@ descending n = go n Lte.reflexive
 
 -- | Generate 'len' values starting from 'off'.
 --
--- >>> slice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
+-- >>> ascendingSlice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
 -- [2, 3, 4]
 ascendingSlice :: forall n off len.
      Nat off
   -> Nat len
-  -> (off + len < n)
+  -> (off + len <= n)
   -> [Fin n]
-ascendingSlice off len !offPlusLenLtEn = go Nat.zero
+ascendingSlice off len !offPlusLenLteEn = go Nat.zero
   where
     go :: Nat m -> [Fin n]
     go !m = case m <? len of
       Nothing -> []
       Just emLtLen ->
         let !offPlusEmLtOffPlusLen = Lt.incrementL @off emLtLen
-            !offPlusEmLtEn = Lt.transitive offPlusEmLtOffPlusLen offPlusLenLtEn
+            !offPlusEmLtEn = Lt.transitiveNonstrictR offPlusEmLtOffPlusLen offPlusLenLteEn
          in Fin (Nat.plus off m) offPlusEmLtEn : go (Nat.succ m)
 
 -- | Extract the 'Int' from a 'Fin n'. This is intended to be used

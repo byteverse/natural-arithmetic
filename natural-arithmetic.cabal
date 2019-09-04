@@ -29,6 +29,29 @@ description:
   of making it easy for user to assemble proofs. Recall that proof
   assembly is done by hand rather than by an SMT solver, so removing
   some tediousness from this is helpful to users. 
+  .
+  This library provides left and variants variants of several functions.
+  For example, `Arithmetic.Lte` provides both `substituteL` and
+  `substituteR`. This is only done when there are two variants of
+  a function. For substitution, this is the case because we have
+  `b = c, a ≤ b ==> a ≤ c` and `a = c, a ≤ b ==> c ≤ b`. So, we
+  provide both `substituteL` and `substituteR`. However,
+  for addition of inequalities, we have four possible variants:
+  `a ≤ b, c ≤ d ==> a + c ≤ b + d`, `a ≤ b, c ≤ d ==> c + a ≤ b + d`,
+  `a ≤ b, c ≤ d ==> a + c ≤ d + b`, `a ≤ b, c ≤ d ==> c + a ≤ d + b`.
+  Consequently, we only provide a single `plus` function, and users
+  must use `Arithmetic.Plus.commutative` to further manipulate the
+  inequality.
+  .
+  Here are the proof-manipulation vocabulary used by this library.
+  Many of these terms are not standard, but we try to be consistent
+  in this library:
+  .
+  * Weaken: Increase an upper bound without changing the bounded value
+  .
+  * Increment: Increase an upper bound along with the bounded value
+  .
+  * Substitute: Replace a number with an equal number
 bug-reports: https://github.com/andrewthad/natural-arithmetic
 license: BSD-3-Clause
 license-file: LICENSE

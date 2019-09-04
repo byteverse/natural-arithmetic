@@ -1,13 +1,15 @@
 {-# language DataKinds #-}
-{-# language TypeOperators #-}
-{-# language KindSignatures #-}
 {-# language ExplicitForAll #-}
+{-# language KindSignatures #-}
 {-# language MagicHash #-}
 {-# language ScopedTypeVariables #-}
+{-# language TypeOperators #-}
 
 module Arithmetic.Nat
   ( -- * Addition
     plus
+    -- * Subtraction
+  , monus
     -- * Successor
   , succ
     -- * Compare
@@ -27,8 +29,9 @@ module Arithmetic.Nat
 
 import Prelude hiding (succ)
 
+import Arithmetic.Types
+import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
 import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
-import Arithmetic.Unsafe ((:=:)(Equal), type (<=)(Lte))
 import GHC.Exts (Proxy#,proxy#)
 import GHC.TypeNats (type (+),KnownNat,natVal')
 
@@ -61,7 +64,7 @@ testLessThanEqual (Nat x) (Nat y) = if x <= y
 -- | Are the two arguments equal to one another?
 testEqual :: Nat a -> Nat b -> Maybe (a :=: b)
 testEqual (Nat x) (Nat y) = if x == y
-  then Just Equal
+  then Just Eq
   else Nothing
 
 -- | Add two numbers.
@@ -71,6 +74,13 @@ plus (Nat x) (Nat y) = Nat (x + y)
 -- | The successor of a number.
 succ :: Nat a -> Nat (a + 1)
 succ n = plus n one
+
+-- | Subtract the second argument from the first argument.
+monus :: Nat a -> Nat b -> Maybe (Difference a b)
+{-# inline monus #-}
+monus (Nat a) (Nat b) = let c = a - b in if c >= 0
+  then Just (Difference (Nat c) Eq)
+  else Nothing
 
 -- | The number zero.
 zero :: Nat 0

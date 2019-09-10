@@ -33,9 +33,9 @@ import GHC.TypeNats (CmpNat,type (+))
 
 import qualified GHC.TypeNats as GHC
 
--- | Replace the right-hand side of a strict inequality
+-- | Replace the left-hand side of a strict inequality
 -- with an equal number.
-substituteL :: (b :=: c) -> (a < b) -> (a < c)
+substituteL :: (b :=: c) -> (b < a) -> (c < a)
 substituteL Eq Lt = Lt
 
 -- | Replace the right-hand side of a strict inequality

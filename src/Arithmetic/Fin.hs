@@ -16,9 +16,12 @@ module Arithmetic.Fin
   , ascend
   , ascendM
   , ascendM_
+  , descendM
+  , descendM_
   , ascending
   , descending
   , ascendingSlice
+  , descendingSlice
     -- * Absurdities
   , absurd
     -- * Demote
@@ -33,6 +36,7 @@ import GHC.TypeNats (type (+))
 
 import qualified Arithmetic.Lt as Lt
 import qualified Arithmetic.Lte as Lte
+import qualified Arithmetic.Equal as Eq
 import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Plus as Plus
 
@@ -117,10 +121,59 @@ ascendM_ !n f = go Nat.zero
     Nothing -> pure ()
     Just lt -> f (Fin m lt) *> go (Nat.succ m)
 
+descendLemma :: forall a b c. a + 1 :=: b -> b <= c -> a < c
+{-# inline descendLemma #-}
+descendLemma !aPlusOneEqB !bLteC = id
+  $ Lt.transitiveNonstrictR
+      (Lt.substituteR (Plus.commutative @1 @a)
+      (Lt.plus Lt.zero Lte.reflexive))
+  $ Lte.substituteL (Eq.symmetric aPlusOneEqB) bLteC
+
+-- | Strict monadic left fold over the numbers bounded by @n@
+-- in descending order. Roughly:
+--
+-- > descendM 4 z f =
+-- >   f 3 z0 >>= \z1 ->
+-- >   f 2 z1 >>= \z2 ->
+-- >   f 1 z2 >>= \z3 ->
+-- >   f 0 z3
+descendM :: forall m a n. Monad m
+  => Nat n
+  -> a
+  -> (Fin n -> a -> m a)
+  -> m a
+{-# inline descendM #-}
+descendM !n !b0 f = go n Lte.reflexive b0
+  where
+    go :: Nat p -> p <= n -> a -> m a
+    go !m pLteEn !b = case Nat.monus m Nat.one of
+      Nothing -> pure b
+      Just (Difference (mpred :: Nat c) cPlusOneEqP) ->
+        let !cLtEn = descendLemma cPlusOneEqP pLteEn
+        in go mpred (Lte.fromStrict cLtEn) =<< f (Fin mpred cLtEn) b
+
+-- | Monadic traversal of the numbers bounded by @n@
+-- in descending order.
+--
+-- > descendM_ 4 f = f 3 *> f 2 *> f 1 *> f 0
+descendM_ :: forall m a n. Applicative m
+  => Nat n -- ^ Upper bound
+  -> (Fin n -> m a) -- ^ Effectful interpretion
+  -> m ()
+{-# inline descendM_ #-}
+descendM_ !n f = go n Lte.reflexive
+  where
+  go :: Nat p -> p <= n -> m ()
+  go !m !pLteEn = case Nat.monus m Nat.one of
+    Nothing -> pure ()
+    Just (Difference (mpred :: Nat c) cPlusOneEqP) ->
+      let !cLtEn = descendLemma cPlusOneEqP pLteEn
+      in f (Fin mpred cLtEn) *> go mpred (Lte.fromStrict cLtEn)
+
 -- | Generate all values of a finite set in ascending order.
 --
 -- >>> ascending (Nat.constant @3)
--- [0, 1, 2]
+-- [Fin 0,Fin 1,Fin 2]
 ascending :: forall n. Nat n -> [Fin n]
 ascending !n = go Nat.zero
   where
@@ -132,33 +185,28 @@ ascending !n = go Nat.zero
 -- | Generate all values of a finite set in descending order.
 --
 -- >>> descending (Nat.constant @3)
--- [2, 1, 0]
+-- [Fin 2,Fin 1,Fin 0]
 descending :: forall n. Nat n -> [Fin n]
-descending n = go n Lte.reflexive
+descending !n = go n Lte.reflexive
   where
-    go :: forall m. Nat m -> (m <= n) -> [Fin n]
-    go !m !lt = case Nat.monus m Nat.one of
+    go :: Nat p -> (p <= n) -> [Fin n]
+    go !m !pLteEn = case Nat.monus m Nat.one of
       Nothing -> []
-      Just (Difference mpred eq) -> go2 lt mpred eq
-    go2 :: forall m c. (m <= n) -> Nat c -> (c + 1 :=: m) -> [Fin n]
-    go2 !lt !c !eq = 
-        let ceeLtEm :: c < m
-            ceeLtEm = id
-              $ Lt.substituteR eq
-              $ Lt.substituteL Plus.zeroL
-              $ Lt.incrementL @c Lt.zero
-         in Fin c (Lt.transitiveNonstrictR ceeLtEm lt) : go c
-              (Lte.transitive (Lte.substituteR eq (Lte.weakenR @1 (Lte.reflexive @c))) lt)
+      Just (Difference (mpred :: Nat c) cPlusOneEqP) ->
+        let !cLtEn = descendLemma cPlusOneEqP pLteEn
+        in Fin mpred cLtEn : go mpred (Lte.fromStrict cLtEn)
 
--- | Generate 'len' values starting from 'off'.
+-- | Generate 'len' values starting from 'off' in ascending order.
 --
--- >>> ascendingSlice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
--- [2, 3, 4]
-ascendingSlice :: forall n off len.
-     Nat off
+-- >>> ascendingSlice (Nat.constant @2) (Nat.constant @3) (Lte.constant @_ @6)
+-- [Fin 2,Fin 3,Fin 4]
+ascendingSlice
+  :: forall n off len
+  .  Nat off
   -> Nat len
-  -> (off + len <= n)
+  -> off + len <= n
   -> [Fin n]
+{-# inline ascendingSlice #-}
 ascendingSlice off len !offPlusLenLteEn = go Nat.zero
   where
     go :: Nat m -> [Fin n]
@@ -168,6 +216,37 @@ ascendingSlice off len !offPlusLenLteEn = go Nat.zero
         let !offPlusEmLtOffPlusLen = Lt.incrementL @off emLtLen
             !offPlusEmLtEn = Lt.transitiveNonstrictR offPlusEmLtOffPlusLen offPlusLenLteEn
          in Fin (Nat.plus off m) offPlusEmLtEn : go (Nat.succ m)
+
+-- | Generate 'len' values starting from 'off + len - 1' in descending order.
+--
+-- >>> descendingSlice (Nat.constant @2) (Nat.constant @3) (Lt.constant @6)
+-- [Fin 4,Fin 3,Fin 2]
+descendingSlice
+  :: forall n off len
+  .  Nat off
+  -> Nat len
+  -> off + len <= n
+  -> [Fin n]
+{-# inline descendingSlice #-}
+descendingSlice !off !len !offPlusLenLteEn =
+  go len Lte.reflexive
+  where
+    go :: Nat m -> m <= len -> [Fin n]
+    go !m !mLteEn = case Nat.monus m Nat.one of
+      Nothing -> []
+      Just (Difference (mpred :: Nat c) cPlusOneEqEm) ->
+        let !cLtLen = Lt.transitiveNonstrictR
+              (Lt.substituteR (Plus.commutative @1 @c) (Lt.plus Lt.zero Lte.reflexive))
+              -- c < c + 1
+              (Lte.substituteL (Eq.symmetric cPlusOneEqEm) mLteEn)
+              -- c + 1 <= len
+            !cPlusOffLtEn = Lt.transitiveNonstrictR
+              (Lt.substituteR
+                (Plus.commutative @len @off)
+                (Lt.plus cLtLen (Lte.reflexive @off)))
+              -- c + off < off + len
+              offPlusLenLteEn
+        in Fin (mpred `Nat.plus` off) cPlusOffLtEn : go mpred (Lte.fromStrict cLtLen)
 
 -- | Extract the 'Int' from a 'Fin n'. This is intended to be used
 -- at a boundary where a safe interface meets the unsafe primitives

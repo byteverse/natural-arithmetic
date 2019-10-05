@@ -16,6 +16,7 @@ module Arithmetic.Nat
   , testEqual
   , testLessThan
   , testLessThanEqual
+  , testZero
   , (=?)
   , (<?)
   , (<=?)
@@ -66,6 +67,12 @@ testEqual :: Nat a -> Nat b -> Maybe (a :=: b)
 testEqual (Nat x) (Nat y) = if x == y
   then Just Eq
   else Nothing
+
+-- | Is zero equal to this number or less than it?
+testZero :: Nat a -> Either (0 :=: a) (0 < a)
+testZero (Nat x) = case x of
+  0 -> Left Eq
+  _ -> Right Lt
 
 -- | Add two numbers.
 plus :: Nat a -> Nat b -> Nat (a + b)

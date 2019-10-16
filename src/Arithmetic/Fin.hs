@@ -10,6 +10,7 @@ module Arithmetic.Fin
   ( -- * Modification
     incrementL
   , incrementR
+  , weaken
   , weakenL
   , weakenR
     -- * Traverse
@@ -50,7 +51,8 @@ incrementR m (Fin i pf) = Fin (Nat.plus i m) (Lt.incrementR @m pf)
 incrementL :: forall n m. Nat m -> Fin n -> Fin (m + n)
 incrementL m (Fin i pf) = Fin (Nat.plus m i) (Lt.incrementL @m pf)
 
--- | Weaken the bound by one. This does not change the index.
+-- | Weaken the bound by @m@, adding it to the left-hand side of
+-- the existing bound. This does not change the index.
 weakenL :: forall n m. Fin n -> Fin (m + n)
 weakenL (Fin i pf) = Fin i
   ( Lt.substituteR
@@ -58,9 +60,15 @@ weakenL (Fin i pf) = Fin i
     (Lt.plus pf (Lte.zero @m))
   )
 
--- side of @n@. This does not change the index.
+-- | Weaken the bound by @m@, adding it to the right-hand side of
+-- the existing bound. This does not change the index.
 weakenR :: forall n m. Fin n -> Fin (n + m)
 weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
+
+-- | Weaken the bound, replacing it by another number greater than
+-- or equal to itself. This does not change the index.
+weaken :: forall n m. (n <= m) -> Fin n -> Fin m
+weaken lt (Fin i pf) = Fin i (Lt.transitiveNonstrictR pf lt)
 
 -- | A finite set of no values is impossible.
 absurd :: Fin 0 -> void

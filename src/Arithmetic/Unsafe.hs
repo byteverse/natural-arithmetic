@@ -1,8 +1,11 @@
 {-# language DataKinds #-}
+{-# language DerivingStrategies #-}
 {-# language ExplicitNamespaces #-}
 {-# language GADTSyntax #-}
+{-# language GeneralizedNewtypeDeriving #-}
 {-# language KindSignatures #-}
 {-# language RoleAnnotations #-}
+{-# language StandaloneDeriving #-}
 {-# language TypeOperators #-}
 
 module Arithmetic.Unsafe
@@ -33,6 +36,8 @@ infix 4 :=:
 -- | A value-level representation of a natural number @n@.
 newtype Nat (n :: GHC.Nat) = Nat { getNat :: Int }
 type role Nat nominal
+
+deriving newtype instance Show (Nat n)
 
 -- | Proof that the first argument is strictly less than the
 -- second argument.

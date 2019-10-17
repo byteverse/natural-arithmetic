@@ -14,9 +14,16 @@ module Arithmetic.Fin
   , weakenL
   , weakenR
     -- * Traverse
+    -- | These use the terms @ascend@ and @descend@ rather than the
+    -- more popular @l@ (left) and @r@ (right) that pervade the Haskell
+    -- ecosystem. The general rule is that ascending functions pair
+    -- the initial accumulator with zero with descending functions
+    -- pair the initial accumulator with the last index.
   , ascend
+  , ascend'
   , ascendM
   , ascendM_
+  , descend
   , descendM
   , descendM_
   , ascending
@@ -74,18 +81,55 @@ weaken lt (Fin i pf) = Fin i (Lt.transitiveNonstrictR pf lt)
 absurd :: Fin 0 -> void
 absurd (Fin _ pf) = Lt.absurd pf
 
--- | Strict fold over the numbers bounded by @n@ in ascending
--- order. For convenince, this differs from @foldl'@ in the
--- order of the parameters differs from @foldl@. Roughly:
+-- | Fold over the numbers bounded by @n@ in descending
+-- order. This is lazy in the accumulator. For convenince,
+-- this differs from @foldr@ in the order of the parameters.
 --
--- > ascend 4 z f = f 3 (f 2 (f 1 (f 0 z)))
-ascend :: forall a n.
+-- > descend 4 z f = f 0 (f 1 (f 2 (f 3 z)))
+descend :: forall a n.
      Nat n -- ^ Upper bound
   -> a -- ^ Initial accumulator
   -> (Fin n -> a -> a) -- ^ Update accumulator
   -> a
+{-# inline descend #-}
+descend !n b0 f = go Nat.zero
+  where
+  go :: Nat m -> a
+  go !m = case m <? n of
+    Nothing -> b0
+    Just lt -> f (Fin m lt) (go (Nat.succ m))
+
+-- | Fold over the numbers bounded by @n@ in ascending order. This
+-- is lazy in the accumulator.
+--
+-- > ascend 4 z f = f 3 (f 2 (f 1 (f 0 z)))
+ascend :: forall a n.
+     Nat n
+  -> a
+  -> (Fin n -> a -> a)
+  -> a
 {-# inline ascend #-}
-ascend !n !b0 f = go Nat.zero b0
+ascend !n !b0 f = go n Lte.reflexive
+  where
+    go :: Nat p -> (p <= n) -> a
+    go !m pLteEn = case Nat.monus m Nat.one of
+      Nothing -> b0
+      Just (Difference (mpred :: Nat c) cPlusOneEqP) ->
+        let !cLtEn = descendLemma cPlusOneEqP pLteEn
+        in f (Fin mpred cLtEn) (go mpred (Lte.fromStrict cLtEn))
+
+-- | Strict fold over the numbers bounded by @n@ in ascending
+-- order. For convenince, this differs from @foldl'@ in the
+-- order of the parameters.
+--
+-- > ascend' 4 z f = f 3 (f 2 (f 1 (f 0 z)))
+ascend' :: forall a n.
+     Nat n -- ^ Upper bound
+  -> a -- ^ Initial accumulator
+  -> (Fin n -> a -> a) -- ^ Update accumulator
+  -> a
+{-# inline ascend' #-}
+ascend' !n !b0 f = go Nat.zero b0
   where
   go :: Nat m -> a -> a
   go !m !b = case m <? n of
@@ -95,7 +139,7 @@ ascend !n !b0 f = go Nat.zero b0
 -- | Strict monadic left fold over the numbers bounded by @n@
 -- in ascending order. Roughly:
 --
--- > ascendM 4 z f =
+-- > ascendM 4 z0 f =
 -- >   f 0 z0 >>= \z1 ->
 -- >   f 1 z1 >>= \z2 ->
 -- >   f 2 z2 >>= \z3 ->

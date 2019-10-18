@@ -24,6 +24,8 @@ module Arithmetic.Nat
     -- * Constants
   , zero
   , one
+  , two
+  , three
   , constant
     -- * Convert
   , demote
@@ -98,6 +100,14 @@ zero = Nat 0
 -- | The number one.
 one :: Nat 1
 one = Nat 1
+
+-- | The number two.
+two :: Nat 2
+two = Nat 2
+
+-- | The number three.
+three :: Nat 3
+three = Nat 3
 
 -- | Use GHC's built-in type-level arithmetic to create a witness
 -- of a type-level number. This only reduces if the number is a

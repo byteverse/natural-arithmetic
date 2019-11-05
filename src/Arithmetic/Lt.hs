@@ -21,6 +21,9 @@ module Arithmetic.Lt
   , transitive
   , transitiveNonstrictL
   , transitiveNonstrictR
+    -- * Convert to Inequality
+  , toLteL
+  , toLteR
     -- * Absurdities
   , absurd
     -- * Integration with GHC solver
@@ -32,6 +35,12 @@ import Arithmetic.Unsafe (type (<=)(Lte))
 import GHC.TypeNats (CmpNat,type (+))
 
 import qualified GHC.TypeNats as GHC
+
+toLteL :: (a < b) -> (a + 1 <= b)
+toLteL Lt = Lte
+
+toLteR :: (a < b) -> (1 + a <= b)
+toLteR Lt = Lte
 
 -- | Replace the left-hand side of a strict inequality
 -- with an equal number.

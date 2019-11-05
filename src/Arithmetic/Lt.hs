@@ -36,11 +36,11 @@ import GHC.TypeNats (CmpNat,type (+))
 
 import qualified GHC.TypeNats as GHC
 
-toLteL :: (a < b) -> (a + 1 <= b)
-toLteL Lt = Lte
-
-toLteR :: (a < b) -> (1 + a <= b)
+toLteR :: (a < b) -> (a + 1 <= b)
 toLteR Lt = Lte
+
+toLteL :: (a < b) -> (1 + a <= b)
+toLteL Lt = Lte
 
 -- | Replace the left-hand side of a strict inequality
 -- with an equal number.

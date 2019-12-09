@@ -23,7 +23,10 @@ import GHC.TypeNats (type (+))
 import qualified GHC.TypeNats as GHC
 
 data WithNat :: (GHC.Nat -> Type) -> Type where
-  WithNat :: Nat n -> f n -> WithNat f
+  WithNat ::
+       {-# UNPACK #-} !(Nat n)
+    -> f n
+    -> WithNat f
 
 -- | A finite set of 'n' elements. 'Fin n = { 0 .. n - 1 }'
 data Fin :: GHC.Nat -> Type where

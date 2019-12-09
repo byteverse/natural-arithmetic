@@ -24,6 +24,7 @@ module Arithmetic.Fin
   , ascendM
   , ascendM_
   , descend
+  , descend'
   , descendM
   , descendM_
   , ascending
@@ -98,6 +99,26 @@ descend !n b0 f = go Nat.zero
   go !m = case m <? n of
     Nothing -> b0
     Just lt -> f (Fin m lt) (go (Nat.succ m))
+
+-- | Fold over the numbers bounded by @n@ in descending
+-- order. This is strict in the accumulator. For convenince,
+-- this differs from @foldr'@ in the order of the parameters.
+--
+-- > descend 4 z f = f 0 (f 1 (f 2 (f 3 z)))
+descend' :: forall a n.
+     Nat n -- ^ Upper bound
+  -> a -- ^ Initial accumulator
+  -> (Fin n -> a -> a) -- ^ Update accumulator
+  -> a
+{-# inline descend' #-}
+descend' !n !b0 f = go n Lte.reflexive b0
+  where
+    go :: Nat p -> p <= n -> a -> a
+    go !m pLteEn !b = case Nat.monus m Nat.one of
+      Nothing -> b
+      Just (Difference (mpred :: Nat c) cPlusOneEqP) ->
+        let !cLtEn = descendLemma cPlusOneEqP pLteEn
+        in go mpred (Lte.fromStrict cLtEn) (f (Fin mpred cLtEn) b)
 
 -- | Fold over the numbers bounded by @n@ in ascending order. This
 -- is lazy in the accumulator.

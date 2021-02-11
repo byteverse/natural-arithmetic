@@ -52,16 +52,19 @@ import qualified Arithmetic.Plus as Plus
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the right-hand side of @n@.
 incrementR :: forall n m. Nat m -> Fin n -> Fin (n + m)
+{-# inline incrementR #-}
 incrementR m (Fin i pf) = Fin (Nat.plus i m) (Lt.incrementR @m pf)
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the left-hand side of @n@.
 incrementL :: forall n m. Nat m -> Fin n -> Fin (m + n)
+{-# inline incrementL #-}
 incrementL m (Fin i pf) = Fin (Nat.plus m i) (Lt.incrementL @m pf)
 
 -- | Weaken the bound by @m@, adding it to the left-hand side of
 -- the existing bound. This does not change the index.
 weakenL :: forall n m. Fin n -> Fin (m + n)
+{-# inline weakenL #-}
 weakenL (Fin i pf) = Fin i
   ( Lt.substituteR
     (Plus.commutative @n @m)
@@ -71,15 +74,18 @@ weakenL (Fin i pf) = Fin i
 -- | Weaken the bound by @m@, adding it to the right-hand side of
 -- the existing bound. This does not change the index.
 weakenR :: forall n m. Fin n -> Fin (n + m)
+{-# inline weakenR #-}
 weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
 
 -- | Weaken the bound, replacing it by another number greater than
 -- or equal to itself. This does not change the index.
 weaken :: forall n m. (n <= m) -> Fin n -> Fin m
+{-# inline weaken #-}
 weaken lt (Fin i pf) = Fin i (Lt.transitiveNonstrictR pf lt)
 
 -- | A finite set of no values is impossible.
 absurd :: Fin 0 -> void
+{-# inline absurd #-}
 absurd (Fin _ pf) = Lt.absurd pf
 
 -- | Fold over the numbers bounded by @n@ in descending
@@ -325,4 +331,5 @@ descendingSlice !off !len !offPlusLenLteEn =
 -- at a boundary where a safe interface meets the unsafe primitives
 -- on top of which it is built.
 demote :: Fin n -> Int
+{-# inline demote #-}
 demote (Fin i _) = Nat.demote i

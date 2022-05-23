@@ -4,12 +4,15 @@
 {-# language GADTSyntax #-}
 {-# language GeneralizedNewtypeDeriving #-}
 {-# language KindSignatures #-}
+{-# language MagicHash #-}
 {-# language RoleAnnotations #-}
 {-# language StandaloneDeriving #-}
 {-# language TypeOperators #-}
+{-# language UnliftedNewtypes #-}
 
 module Arithmetic.Unsafe
   ( Nat(..)
+  , Fin#(..)
   , type (<)(Lt)
   , type (<=)(Lte)
   , type (:=:)(Eq)
@@ -19,6 +22,7 @@ import Prelude hiding ((>=),(<=))
 
 import Control.Category (Category)
 import Data.Kind (Type)
+import GHC.Exts (Int#,TYPE,RuntimeRep(IntRep))
 
 import qualified Control.Category
 import qualified GHC.TypeNats as GHC
@@ -38,6 +42,10 @@ newtype Nat (n :: GHC.Nat) = Nat { getNat :: Int }
 type role Nat nominal
 
 deriving newtype instance Show (Nat n)
+
+-- | Finite numbers without the overhead of carrying around a proof.
+newtype Fin# :: GHC.Nat -> TYPE 'IntRep where
+  Fin# :: Int# -> Fin# n
 
 -- | Proof that the first argument is strictly less than the
 -- second argument.

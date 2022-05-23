@@ -3,6 +3,7 @@
 {-# language ExplicitNamespaces #-}
 {-# language GADTs #-}
 {-# language KindSignatures #-}
+{-# language MagicHash #-}
 {-# language ScopedTypeVariables #-}
 {-# language TypeApplications #-}
 {-# language TypeOperators #-}
@@ -35,12 +36,16 @@ module Arithmetic.Fin
   , absurd
     -- * Demote
   , demote
+    -- * Lift and Unlift
+  , lift
+  , unlift
   ) where
 
 import Prelude hiding (last)
 
 import Arithmetic.Nat ((<?))
 import Arithmetic.Types (Fin(..),Difference(..),Nat,type (<), type (<=), type (:=:))
+import GHC.Exts (Int(I#))
 import GHC.TypeNats (type (+))
 
 import qualified Arithmetic.Lt as Lt
@@ -48,6 +53,7 @@ import qualified Arithmetic.Lte as Lte
 import qualified Arithmetic.Equal as Eq
 import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Plus as Plus
+import qualified Arithmetic.Unsafe as Unsafe
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the right-hand side of @n@.
@@ -333,3 +339,11 @@ descendingSlice !off !len !offPlusLenLteEn =
 demote :: Fin n -> Int
 {-# inline demote #-}
 demote (Fin i _) = Nat.demote i
+
+lift :: Unsafe.Fin# n -> Fin n
+{-# inline lift #-}
+lift (Unsafe.Fin# i) = Fin (Unsafe.Nat (I# i)) Unsafe.Lt
+
+unlift :: Fin n -> Unsafe.Fin# n
+{-# inline unlift #-}
+unlift (Fin (Unsafe.Nat (I# i)) _) = Unsafe.Fin# i

@@ -1,6 +1,6 @@
 cabal-version: 2.2
 name: natural-arithmetic
-version: 0.1.2.0
+version: 0.1.3.0
 synopsis: Arithmetic of natural numbers
 description:
   A search for terms like `arithmetic` and `natural` on hackage reveals
@@ -74,7 +74,7 @@ library
     Arithmetic.Types
     Arithmetic.Unsafe
     Arithmetic.Plus
-  build-depends: base>=4.11 && <5
+  build-depends: base>=4.14 && <5
   hs-source-dirs: src
   default-language: Haskell2010
   ghc-options: -Wall -O2

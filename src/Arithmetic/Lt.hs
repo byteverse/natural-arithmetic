@@ -24,6 +24,7 @@ module Arithmetic.Lt
   , transitiveNonstrictR
     -- * Multiplication and Division
   , reciprocalA
+  , reciprocalB
     -- * Convert to Inequality
   , toLteL
   , toLteR
@@ -129,3 +130,9 @@ reciprocalA :: forall (m :: GHC.Nat) (n :: GHC.Nat) (p :: GHC.Nat).
   (m < GHC.Div n p) -> (p GHC.* m) < n
 {-# inline reciprocalA #-}
 reciprocalA _ = Lt
+
+-- | Given that @m < roundUp(n/p)@, we know that @p*m < n@.
+reciprocalB :: forall (m :: GHC.Nat) (n :: GHC.Nat) (p :: GHC.Nat).
+  (m < GHC.Div (n GHC.- 1) p + 1) -> (p GHC.* m) < n
+{-# inline reciprocalB #-}
+reciprocalB _ = Lt

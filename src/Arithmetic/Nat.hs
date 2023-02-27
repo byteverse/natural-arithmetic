@@ -13,6 +13,7 @@ module Arithmetic.Nat
   , monus
     -- * Division
   , divide
+  , divideRoundingUp
     -- * Multiplication
   , times
     -- * Successor
@@ -42,7 +43,7 @@ import Arithmetic.Types
 import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
 import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
 import GHC.Exts (Proxy#,proxy#)
-import GHC.TypeNats (type (+),Div,KnownNat,natVal')
+import GHC.TypeNats (type (+),type (-),Div,KnownNat,natVal')
 
 import qualified GHC.TypeNats as GHC
 
@@ -96,10 +97,18 @@ plus :: Nat a -> Nat b -> Nat (a + b)
 {-# inline plus #-}
 plus (Nat x) (Nat y) = Nat (x + y)
 
--- | Divide two numbers.
+-- | Divide two numbers. Rounds down (towards zero)
 divide :: Nat a -> Nat b -> Nat (Div a b)
 {-# inline divide #-}
 divide (Nat x) (Nat y) = Nat (div x y)
+
+-- | Divide two numbers. Rounds up (away from zero)
+divideRoundingUp :: Nat a -> Nat b -> Nat (Div (a - 1) b + 1)
+{-# inline divideRoundingUp #-}
+divideRoundingUp (Nat x) (Nat y) =
+  -- Implementation note. We must use div so that when x=0,
+  -- the result is (-1) and not 0. Then when we add 1, we get 0.
+  Nat (1 + (div (x - 1) y))
 
 -- | Multiply two numbers.
 times :: Nat a -> Nat b -> Nat (a GHC.* b)

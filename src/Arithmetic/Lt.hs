@@ -1,3 +1,4 @@
+{-# language AllowAmbiguousTypes #-}
 {-# language DataKinds #-}
 {-# language ExplicitForAll #-}
 {-# language KindSignatures #-}
@@ -21,6 +22,8 @@ module Arithmetic.Lt
   , transitive
   , transitiveNonstrictL
   , transitiveNonstrictR
+    -- * Multiplication and Division
+  , reciprocalA
     -- * Convert to Inequality
   , toLteL
   , toLteR
@@ -121,3 +124,8 @@ constant :: forall a b. (CmpNat a b ~ 'LT) => (a < b)
 {-# inline constant #-}
 constant = Lt
 
+-- | Given that @m < n/p@, we know that @p*m < n@.
+reciprocalA :: forall (m :: GHC.Nat) (n :: GHC.Nat) (p :: GHC.Nat).
+  (m < GHC.Div n p) -> (p GHC.* m) < n
+{-# inline reciprocalA #-}
+reciprocalA _ = Lt

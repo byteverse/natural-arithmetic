@@ -22,6 +22,7 @@ module Arithmetic.Fin
     -- pair the initial accumulator with the last index.
   , ascend
   , ascend'
+  , ascendFrom'
   , ascendM
   , ascendM_
   , descend
@@ -166,6 +167,24 @@ ascend' !n !b0 f = go Nat.zero b0
   where
   go :: Nat m -> a -> a
   go !m !b = case m <? n of
+    Nothing -> b
+    Just lt -> go (Nat.succ m) (f (Fin m lt) b)
+
+-- | Generalization of @ascend'@ that lets the caller pick the starting index:
+--
+-- > ascend' === ascendFrom' 0
+ascendFrom' :: forall a m n.
+     Nat m -- ^ Index to start at
+  -> Nat n -- ^ Number of steps to take
+  -> a -- ^ Initial accumulator
+  -> (Fin (m + n) -> a -> a) -- ^ Update accumulator
+  -> a
+{-# inline ascendFrom' #-}
+ascendFrom' !m0 !n !b0 f = go m0 b0
+  where
+  end = Nat.plus m0 n
+  go :: Nat k -> a -> a
+  go !m !b = case m <? end of
     Nothing -> b
     Just lt -> go (Nat.succ m) (f (Fin m lt) b)
 

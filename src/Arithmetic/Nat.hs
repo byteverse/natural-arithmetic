@@ -11,6 +11,10 @@ module Arithmetic.Nat
     plus
     -- * Subtraction
   , monus
+    -- * Division
+  , divide
+    -- * Multiplication
+  , times
     -- * Successor
   , succ
     -- * Compare
@@ -38,7 +42,9 @@ import Arithmetic.Types
 import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
 import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
 import GHC.Exts (Proxy#,proxy#)
-import GHC.TypeNats (type (+),KnownNat,natVal')
+import GHC.TypeNats (type (+),Div,KnownNat,natVal')
+
+import qualified GHC.TypeNats as GHC
 
 -- | Infix synonym of 'testLessThan'.
 (<?) :: Nat a -> Nat b -> Maybe (a < b)
@@ -89,6 +95,16 @@ testZero (Nat x) = case x of
 plus :: Nat a -> Nat b -> Nat (a + b)
 {-# inline plus #-}
 plus (Nat x) (Nat y) = Nat (x + y)
+
+-- | Divide two numbers.
+divide :: Nat a -> Nat b -> Nat (Div a b)
+{-# inline divide #-}
+divide (Nat x) (Nat y) = Nat (div x y)
+
+-- | Multiply two numbers.
+times :: Nat a -> Nat b -> Nat (a GHC.* b)
+{-# inline times #-}
+times (Nat x) (Nat y) = Nat (x * y)
 
 -- | The successor of a number.
 succ :: Nat a -> Nat (a + 1)

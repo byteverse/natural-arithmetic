@@ -14,6 +14,9 @@ module Arithmetic.Lt
     -- * Increment
   , incrementL
   , incrementR
+    -- * Decrement
+  , decrementL
+  , decrementR
     -- * Weaken
   , weakenL
   , weakenR
@@ -78,6 +81,20 @@ incrementR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
   (a < b) -> (a + c < b + c)
 {-# inline incrementR #-}
 incrementR Lt = Lt
+
+-- | Subtract a constant from the left-hand side of both sides of
+-- the inequality. This is the opposite of 'incrementL'.
+decrementL :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (c + a < c + b) -> (a < b)
+{-# inline decrementL #-}
+decrementL Lt = Lt
+
+-- | Subtract a constant from the right-hand side of both sides of
+-- the inequality. This is the opposite of 'incrementR'.
+decrementR :: forall (c :: GHC.Nat) (a :: GHC.Nat) (b :: GHC.Nat).
+  (a + c < b + c) -> (a < b)
+{-# inline decrementR #-}
+decrementR Lt = Lt
 
 -- | Add a constant to the left-hand side of the right-hand side of
 -- the strict inequality.

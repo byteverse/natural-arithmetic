@@ -5,10 +5,12 @@
 {-# language RankNTypes #-}
 {-# language ScopedTypeVariables #-}
 {-# language TypeOperators #-}
+{-# language UnboxedTuples #-}
 
 module Arithmetic.Nat
   ( -- * Addition
     plus
+  , plus#
     -- * Subtraction
   , monus
     -- * Division
@@ -32,8 +34,12 @@ module Arithmetic.Nat
   , two
   , three
   , constant
+    -- * Unboxed Constants
+  , zero#
     -- * Convert
   , demote
+  , unlift
+  , lift
   , with
   ) where
 
@@ -41,9 +47,10 @@ import Prelude hiding (succ)
 
 import Arithmetic.Types
 import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
-import Arithmetic.Unsafe (Nat(Nat),type (<)(Lt))
-import GHC.Exts (Proxy#,proxy#)
+import Arithmetic.Unsafe (Nat(Nat),Nat#(Nat#),type (<)(Lt))
+import GHC.Exts (Proxy#,proxy#,(+#))
 import GHC.TypeNats (type (+),type (-),Div,KnownNat,natVal')
+import GHC.Int (Int(I#))
 
 import qualified GHC.TypeNats as GHC
 
@@ -96,6 +103,11 @@ testZero (Nat x) = case x of
 plus :: Nat a -> Nat b -> Nat (a + b)
 {-# inline plus #-}
 plus (Nat x) (Nat y) = Nat (x + y)
+
+-- | Variant of 'plus' for unboxed nats.
+plus# :: Nat# a -> Nat# b -> Nat# (a + b)
+{-# inline plus# #-}
+plus# (Nat# x) (Nat# y) = Nat# (x +# y)
 
 -- | Divide two numbers. Rounds down (towards zero)
 divide :: Nat a -> Nat b -> Nat (Div a b)
@@ -154,6 +166,10 @@ constant :: forall n. KnownNat n => Nat n
 {-# inline constant #-}
 constant = Nat (fromIntegral (natVal' (proxy# :: Proxy# n)))
 
+-- | The number zero. Unboxed.
+zero# :: (# #) -> Nat# 0
+zero# _ = Nat# 0#
+
 -- | Extract the 'Int' from a 'Nat'. This is intended to be used
 -- at a boundary where a safe interface meets the unsafe primitives
 -- on top of which it is built.
@@ -168,3 +184,11 @@ demote (Nat n) = n
 with :: Int -> (forall n. Nat n -> a) -> a
 {-# inline with #-}
 with i f = f (Nat i)
+
+unlift :: Nat n -> Nat# n
+{-# inline unlift #-}
+unlift (Nat (I# i)) = Nat# i
+
+lift :: Nat# n -> Nat n
+{-# inline lift #-}
+lift (Nat# i) = Nat (I# i)

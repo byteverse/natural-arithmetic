@@ -1,4 +1,5 @@
 {-# language DataKinds #-}
+{-# language MagicHash #-}
 {-# language ExplicitNamespaces #-}
 {-# language GADTs #-}
 {-# language KindSignatures #-}
@@ -7,15 +8,17 @@
 
 module Arithmetic.Types
   ( Nat
+  , Nat#
   , WithNat(..)
   , Difference(..)
   , Fin(..)
+  , Fin#
   , type (<)
   , type (<=)
   , type (:=:)
   ) where
 
-import Arithmetic.Unsafe (Nat(getNat), type (<=))
+import Arithmetic.Unsafe (Fin#,Nat#,Nat(getNat), type (<=))
 import Arithmetic.Unsafe (type (<), type (:=:))
 import Data.Kind (type Type)
 import GHC.TypeNats (type (+))

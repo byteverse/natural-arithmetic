@@ -4,6 +4,7 @@
 {-# language GADTs #-}
 {-# language KindSignatures #-}
 {-# language MagicHash #-}
+{-# language RankNTypes #-}
 {-# language ScopedTypeVariables #-}
 {-# language TypeApplications #-}
 {-# language TypeOperators #-}
@@ -23,8 +24,11 @@ module Arithmetic.Fin
   , ascend
   , ascend'
   , ascendFrom'
+  , ascendFrom'#
   , ascendM
+  , ascendM#
   , ascendM_
+  , ascendM_#
   , descend
   , descend'
   , descendM
@@ -37,6 +41,11 @@ module Arithmetic.Fin
   , absurd
     -- * Demote
   , demote
+    -- * Deconstruct
+  , with
+  , with#
+    -- * Construct
+  , construct#
     -- * Lift and Unlift
   , lift
   , unlift
@@ -45,7 +54,7 @@ module Arithmetic.Fin
 import Prelude hiding (last)
 
 import Arithmetic.Nat ((<?))
-import Arithmetic.Types (Fin(..),Difference(..),Nat,type (<), type (<=), type (:=:))
+import Arithmetic.Types (Fin(..),Fin#,Difference(..),Nat,Nat#,type (<), type (<=), type (:=:))
 import GHC.Exts (Int(I#))
 import GHC.TypeNats (type (+))
 
@@ -188,6 +197,16 @@ ascendFrom' !m0 !n !b0 f = go m0 b0
     Nothing -> b
     Just lt -> go (Nat.succ m) (f (Fin m lt) b)
 
+-- | Variant of @ascendFrom'@ with unboxed arguments.
+ascendFrom'# :: forall a m n.
+     Nat# m -- ^ Index to start at
+  -> Nat# n -- ^ Number of steps to take
+  -> a -- ^ Initial accumulator
+  -> (Fin# (m + n) -> a -> a) -- ^ Update accumulator
+  -> a
+{-# inline ascendFrom'# #-}
+ascendFrom'# !m0 !n !b0 f = ascendFrom' (Nat.lift m0) (Nat.lift n) b0 (\ix -> f (unlift ix))
+
 -- | Strict monadic left fold over the numbers bounded by @n@
 -- in ascending order. Roughly:
 --
@@ -209,6 +228,16 @@ ascendM !n !b0 f = go Nat.zero b0
     Nothing -> pure b
     Just lt -> go (Nat.succ m) =<< f (Fin m lt) b
 
+-- | Variant of @ascendM@ that takes an unboxed Nat and provides
+-- an unboxed Fin to the callback.
+ascendM# :: forall m a n. Monad m
+  => Nat# n -- ^ Upper bound
+  -> a -- ^ Initial accumulator
+  -> (Fin# n -> a -> m a) -- ^ Update accumulator
+  -> m a
+{-# inline ascendM# #-}
+ascendM# n !a0 f = ascendM (Nat.lift n) a0 (\ix a -> f (unlift ix) a)
+
 -- | Monadic traversal of the numbers bounded by @n@
 -- in ascending order.
 --
@@ -224,6 +253,15 @@ ascendM_ !n f = go Nat.zero
   go !m = case m <? n of
     Nothing -> pure ()
     Just lt -> f (Fin m lt) *> go (Nat.succ m)
+
+-- | Variant of @ascendM_@ that takes an unboxed Nat and provides
+-- an unboxed Fin to the callback.
+ascendM_# :: forall m a n. Monad m
+  => Nat# n -- ^ Upper bound
+  -> (Fin# n -> m a) -- ^ Update accumulator
+  -> m ()
+{-# inline ascendM_# #-}
+ascendM_# n f = ascendM_ (Nat.lift n) (\ix -> f (unlift ix))
 
 descendLemma :: forall a b c. a + 1 :=: b -> b <= c -> a < c
 {-# inline descendLemma #-}
@@ -366,3 +404,17 @@ lift (Unsafe.Fin# i) = Fin (Unsafe.Nat (I# i)) Unsafe.Lt
 unlift :: Fin n -> Unsafe.Fin# n
 {-# inline unlift #-}
 unlift (Fin (Unsafe.Nat (I# i)) _) = Unsafe.Fin# i
+
+-- | Consume the natural number and the proof in the Fin.
+with :: Fin n -> (forall i. (i < n) -> Nat i -> a) -> a
+{-# inline with #-}
+with (Fin i lt) f = f lt i
+
+-- | Variant of 'with' for unboxed argument and result types.
+with# :: Fin# n -> (forall i. (i < n) -> Nat# i -> a) -> a
+{-# inline with# #-}
+with# (Unsafe.Fin# i) f = f Unsafe.Lt (Unsafe.Nat# i)
+
+construct# :: (i < n) -> Nat# i -> Fin# n
+{-# inline construct# #-}
+construct# _ (Unsafe.Nat# x) = Unsafe.Fin# x

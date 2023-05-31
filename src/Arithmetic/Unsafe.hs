@@ -12,6 +12,7 @@
 
 module Arithmetic.Unsafe
   ( Nat(..)
+  , Nat#(..)
   , Fin#(..)
   , type (<)(Lt)
   , type (<=)(Lte)
@@ -43,9 +44,15 @@ type role Nat nominal
 
 deriving newtype instance Show (Nat n)
 
+-- | Unboxed variant of Nat.
+newtype Nat# :: GHC.Nat -> TYPE 'IntRep where
+  Nat# :: Int# -> Nat# n
+type role Nat# nominal
+
 -- | Finite numbers without the overhead of carrying around a proof.
 newtype Fin# :: GHC.Nat -> TYPE 'IntRep where
   Fin# :: Int# -> Fin# n
+type role Fin# nominal
 
 -- | Proof that the first argument is strictly less than the
 -- second argument.

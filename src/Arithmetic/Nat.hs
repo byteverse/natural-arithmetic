@@ -6,6 +6,7 @@
 {-# language ScopedTypeVariables #-}
 {-# language TypeOperators #-}
 {-# language UnboxedTuples #-}
+{-# language UnboxedSums #-}
 
 module Arithmetic.Nat
   ( -- * Addition
@@ -20,13 +21,17 @@ module Arithmetic.Nat
   , times
     -- * Successor
   , succ
+  , succ#
     -- * Compare
   , testEqual
   , testLessThan
+  , testLessThan#
   , testLessThanEqual
   , testZero
+  , testZero#
   , (=?)
   , (<?)
+  , (<?#)
   , (<=?)
     -- * Constants
   , zero
@@ -34,8 +39,10 @@ module Arithmetic.Nat
   , two
   , three
   , constant
+  , constant#
     -- * Unboxed Constants
   , zero#
+  , one#
     -- * Convert
   , demote
   , unlift
@@ -46,9 +53,9 @@ module Arithmetic.Nat
 import Prelude hiding (succ)
 
 import Arithmetic.Types
-import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte))
-import Arithmetic.Unsafe (Nat(Nat),Nat#(Nat#),type (<)(Lt))
-import GHC.Exts (Proxy#,proxy#,(+#))
+import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte), (:=:#)(Eq#))
+import Arithmetic.Unsafe (Nat(Nat),Nat#(Nat#),type (<)(Lt),type (<#)(Lt#))
+import GHC.Exts (Proxy#,proxy#,(+#),(<#))
 import GHC.TypeNats (type (+),type (-),Div,KnownNat,natVal')
 import GHC.Int (Int(I#))
 
@@ -69,6 +76,10 @@ import qualified GHC.TypeNats as GHC
 {-# inline (=?) #-}
 (=?) = testEqual
 
+(<?#) :: Nat# a -> Nat# b -> (# (# #) | (a <# b) #)
+{-# inline (<?#) #-}
+(<?#) = testLessThan#
+
 -- | Is the first argument strictly less than the second
 -- argument?
 testLessThan :: Nat a -> Nat b -> Maybe (a < b)
@@ -76,6 +87,12 @@ testLessThan :: Nat a -> Nat b -> Maybe (a < b)
 testLessThan (Nat x) (Nat y) = if x < y
   then Just Lt
   else Nothing
+
+testLessThan# :: Nat# a -> Nat# b -> (# (# #) | (a <# b) #)
+{-# inline testLessThan# #-}
+testLessThan# (Nat# x) (Nat# y) = case x <# y of
+  0# -> (# (# #) | #)
+  _ -> (# | Lt# (# #) #)
 
 -- | Is the first argument less-than-or-equal-to the second
 -- argument?
@@ -98,6 +115,11 @@ testZero :: Nat a -> Either (0 :=: a) (0 < a)
 testZero (Nat x) = case x of
   0 -> Left Eq
   _ -> Right Lt
+
+testZero# :: Nat# a -> (# (0 :=:# a) | (0 <# a) #)
+testZero# (Nat# x) = case x of
+  0# -> (# Eq# (# #) | #)
+  _ -> (# | Lt# (# #) #)
 
 -- | Add two numbers.
 plus :: Nat a -> Nat b -> Nat (a + b)
@@ -131,6 +153,11 @@ times (Nat x) (Nat y) = Nat (x * y)
 succ :: Nat a -> Nat (a + 1)
 {-# inline succ #-}
 succ n = plus n one
+
+-- | Unlifted variant of 'succ'.
+succ# :: Nat# a -> Nat# (a + 1)
+{-# inline succ# #-}
+succ# n = plus# n (one# (# #))
 
 -- | Subtract the second argument from the first argument.
 monus :: Nat a -> Nat b -> Maybe (Difference a b)
@@ -166,9 +193,18 @@ constant :: forall n. KnownNat n => Nat n
 {-# inline constant #-}
 constant = Nat (fromIntegral (natVal' (proxy# :: Proxy# n)))
 
+constant# :: forall n. KnownNat n => (# #) -> Nat# n
+{-# inline constant# #-}
+constant# _ = case fromIntegral (natVal' (proxy# :: Proxy# n)) of
+  I# i -> Nat# i
+
 -- | The number zero. Unboxed.
 zero# :: (# #) -> Nat# 0
 zero# _ = Nat# 0#
+
+-- | The number one. Unboxed.
+one# :: (# #) -> Nat# 1
+one# _ = Nat# 1#
 
 -- | Extract the 'Int' from a 'Nat'. This is intended to be used
 -- at a boundary where a safe interface meets the unsafe primitives

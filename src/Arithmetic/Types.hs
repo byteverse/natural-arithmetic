@@ -13,13 +13,19 @@ module Arithmetic.Types
   , Difference(..)
   , Fin(..)
   , Fin#
+  , Fin32#
   , type (<)
   , type (<=)
+  , type (<#)
+  , type (<=#)
   , type (:=:)
+  , type (:=:#)
   ) where
 
 import Arithmetic.Unsafe (Fin#,Nat#,Nat(getNat), type (<=))
+import Arithmetic.Unsafe (Fin32#)
 import Arithmetic.Unsafe (type (<), type (:=:))
+import Arithmetic.Unsafe (type (<#), type (<=#), (:=:#))
 import Data.Kind (type Type)
 import GHC.TypeNats (type (+))
 

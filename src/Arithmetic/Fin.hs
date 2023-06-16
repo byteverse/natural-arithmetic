@@ -54,7 +54,7 @@ module Arithmetic.Fin
 import Prelude hiding (last)
 
 import Arithmetic.Nat ((<?))
-import Arithmetic.Types (Fin(..),Fin#,Difference(..),Nat,Nat#,type (<), type (<=), type (:=:))
+import Arithmetic.Types (Fin(..),Fin#,Difference(..),Nat,Nat#,type (<), type (<#), type (<=), type (:=:))
 import GHC.Exts (Int(I#))
 import GHC.TypeNats (type (+))
 
@@ -415,6 +415,6 @@ with# :: Fin# n -> (forall i. (i < n) -> Nat# i -> a) -> a
 {-# inline with# #-}
 with# (Unsafe.Fin# i) f = f Unsafe.Lt (Unsafe.Nat# i)
 
-construct# :: (i < n) -> Nat# i -> Fin# n
+construct# :: (i <# n) -> Nat# i -> Fin# n
 {-# inline construct# #-}
 construct# _ (Unsafe.Nat# x) = Unsafe.Fin# x

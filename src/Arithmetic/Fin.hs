@@ -12,9 +12,11 @@ module Arithmetic.Fin
   ( -- * Modification
     incrementL
   , incrementR
+  , incrementR#
   , weaken
   , weakenL
   , weakenR
+  , succ
     -- * Traverse
     -- | These use the terms @ascend@ and @descend@ rather than the
     -- more popular @l@ (left) and @r@ (right) that pervade the Haskell
@@ -30,6 +32,7 @@ module Arithmetic.Fin
   , ascendM_
   , ascendM_#
   , descend
+  , descend#
   , descend'
   , descendM
   , descendM_
@@ -41,21 +44,25 @@ module Arithmetic.Fin
   , absurd
     -- * Demote
   , demote
+  , demote#
     -- * Deconstruct
   , with
   , with#
     -- * Construct
   , construct#
+  , remInt#
+  , remWord#
     -- * Lift and Unlift
   , lift
   , unlift
   ) where
 
-import Prelude hiding (last)
+import Prelude hiding (last,succ)
 
 import Arithmetic.Nat ((<?))
-import Arithmetic.Types (Fin(..),Fin#,Difference(..),Nat,Nat#,type (<), type (<#), type (<=), type (:=:))
-import GHC.Exts (Int(I#))
+import Arithmetic.Types (Fin(..),Difference(..),Nat,Nat#,type (<), type (<#), type (<=), type (:=:))
+import Arithmetic.Unsafe (Nat#(Nat#),Fin#(Fin#))
+import GHC.Exts (Int(I#),(+#),Int#,Word#)
 import GHC.TypeNats (type (+))
 
 import qualified Arithmetic.Lt as Lt
@@ -64,12 +71,17 @@ import qualified Arithmetic.Equal as Eq
 import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Plus as Plus
 import qualified Arithmetic.Unsafe as Unsafe
+import qualified GHC.Exts as Exts
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the right-hand side of @n@.
 incrementR :: forall n m. Nat m -> Fin n -> Fin (n + m)
 {-# inline incrementR #-}
 incrementR m (Fin i pf) = Fin (Nat.plus i m) (Lt.incrementR @m pf)
+
+incrementR# :: forall n m. Nat# m -> Fin# n -> Fin# (n + m)
+{-# inline incrementR# #-}
+incrementR# (Nat# n) (Fin# i) = Fin# (n +# i)
 
 -- | Raise the index by @m@ and weaken the bound by @m@, adding
 -- @m@ to the left-hand side of @n@.
@@ -121,6 +133,14 @@ descend !n b0 f = go Nat.zero
   go !m = case m <? n of
     Nothing -> b0
     Just lt -> f (Fin m lt) (go (Nat.succ m))
+
+descend# :: forall a n.
+     Nat# n -- ^ Upper bound
+  -> a -- ^ Initial accumulator
+  -> (Fin# n -> a -> a) -- ^ Update accumulator
+  -> a
+{-# inline descend# #-}
+descend# !n b0 f = descend (Nat.lift n) b0 (\ix a -> f (unlift ix) a)
 
 -- | Fold over the numbers bounded by @n@ in descending
 -- order. This is strict in the accumulator. For convenince,
@@ -397,6 +417,10 @@ demote :: Fin n -> Int
 {-# inline demote #-}
 demote (Fin i _) = Nat.demote i
 
+demote# :: Fin# n -> Int#
+{-# inline demote# #-}
+demote# (Fin# i) = i
+
 lift :: Unsafe.Fin# n -> Fin n
 {-# inline lift #-}
 lift (Unsafe.Fin# i) = Fin (Unsafe.Nat (I# i)) Unsafe.Lt
@@ -418,3 +442,27 @@ with# (Unsafe.Fin# i) f = f Unsafe.Lt (Unsafe.Nat# i)
 construct# :: (i <# n) -> Nat# i -> Fin# n
 {-# inline construct# #-}
 construct# _ (Unsafe.Nat# x) = Unsafe.Fin# x
+
+-- | Return the successor of the Fin or return nothing if the
+-- argument is the greatest inhabitant.
+succ :: Nat n -> Fin n -> Maybe (Fin n)
+{-# inline succ #-}
+succ n (Fin ix _) = case ix' <? n of
+  Nothing -> Nothing
+  Just lt -> Just (Fin ix' lt)
+  where
+  ix' = Nat.succ ix
+
+-- | This crashes if @n = 0@. Divides @i@ by @n@ and takes
+-- the remainder.
+remInt# :: Int# -> Nat# n -> Fin# n
+remInt# i (Nat# n) = case n of
+  0# -> errorWithoutStackTrace "Arithmetic.Fin.remInt#: cannot divide by zero"
+  _ -> Fin# (Exts.remInt# i n)
+
+-- | This crashes if @n = 0@. Divides @i@ by @n@ and takes
+-- the remainder.
+remWord# :: Word# -> Nat# n -> Fin# n
+remWord# w (Nat# n) = case n of
+  0# -> errorWithoutStackTrace "Arithmetic.Fin.remWord#: cannot divide by zero"
+  _ -> Fin# (Exts.word2Int# (Exts.remWord# w (Exts.int2Word# n)))

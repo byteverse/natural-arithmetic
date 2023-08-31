@@ -1,10 +1,14 @@
 {-# language DataKinds #-}
 {-# language MagicHash #-}
 {-# language ExplicitNamespaces #-}
+{-# language PatternSynonyms #-}
+{-# language ViewPatterns #-}
 {-# language GADTs #-}
 {-# language KindSignatures #-}
 {-# language RankNTypes #-}
 {-# language TypeOperators #-}
+{-# language UnboxedTuples #-}
+{-# language UnboxedSums #-}
 
 module Arithmetic.Types
   ( Nat
@@ -14,6 +18,11 @@ module Arithmetic.Types
   , Fin(..)
   , Fin#
   , Fin32#
+    -- * Maybe Fin
+  , MaybeFin#
+  , pattern MaybeFinJust#
+  , pattern MaybeFinNothing#
+    -- * Infix Operators
   , type (<)
   , type (<=)
   , type (<#)
@@ -22,8 +31,9 @@ module Arithmetic.Types
   , type (:=:#)
   ) where
 
-import Arithmetic.Unsafe (Fin#,Nat#,Nat(getNat), type (<=))
+import Arithmetic.Unsafe (Fin#(Fin#),Nat#,Nat(getNat), type (<=))
 import Arithmetic.Unsafe (Fin32#)
+import Arithmetic.Unsafe (MaybeFin#(..))
 import Arithmetic.Unsafe (type (<), type (:=:))
 import Arithmetic.Unsafe (type (<#), type (<=#), (:=:#))
 import Data.Kind (type Type)
@@ -60,3 +70,16 @@ instance Eq (Fin n) where
 
 instance Ord (Fin n) where
   Fin x _ `compare` Fin y _ = compare (getNat x) (getNat y)
+
+pattern MaybeFinJust# :: Fin# n -> MaybeFin# n
+pattern MaybeFinJust# f <- (maybeFinToFin# -> (# | f #)) where
+  MaybeFinJust# (Fin# i) = MaybeFin# i
+
+pattern MaybeFinNothing# :: MaybeFin# n
+pattern MaybeFinNothing# = MaybeFin# (-1#)
+
+maybeFinToFin# :: MaybeFin# n -> (# (# #) | Fin# n #)
+{-# inline maybeFinToFin# #-}
+maybeFinToFin# (MaybeFin# i) = case i of
+  -1# -> (# (# #) | #)
+  _ -> (# | Fin# i #)

@@ -11,6 +11,7 @@ module Arithmetic.Equal
   , plusL
   , plusR#
   , plusL#
+  , lift
   ) where
 
 import Arithmetic.Unsafe (type (:=:)(Eq), type (:=:#)(Eq#))
@@ -36,3 +37,6 @@ plusR# :: forall c m n. (m :=:# n) -> (m + c :=:# n + c)
 {-# inline plusR# #-}
 plusR# _ = Eq# (# #)
 
+lift :: (m :=:# n) -> (m :=: n)
+{-# inline lift #-}
+lift _ = Eq

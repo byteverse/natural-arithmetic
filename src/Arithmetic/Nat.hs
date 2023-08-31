@@ -2,6 +2,7 @@
 {-# language ExplicitForAll #-}
 {-# language KindSignatures #-}
 {-# language MagicHash #-}
+{-# language PatternSynonyms #-}
 {-# language RankNTypes #-}
 {-# language ScopedTypeVariables #-}
 {-# language TypeOperators #-}
@@ -24,6 +25,7 @@ module Arithmetic.Nat
   , succ#
     -- * Compare
   , testEqual
+  , testEqual#
   , testLessThan
   , testLessThan#
   , testLessThanEqual
@@ -43,11 +45,29 @@ module Arithmetic.Nat
     -- * Unboxed Constants
   , zero#
   , one#
+    -- * Unboxed Pattern Synonyms
+  , pattern N0#
+  , pattern N1#
+  , pattern N2#
+  , pattern N3#
+  , pattern N4#
+  , pattern N8#
+  , pattern N16#
+  , pattern N32#
+  , pattern N64#
+  , pattern N128#
+  , pattern N256#
+  , pattern N512#
+  , pattern N1024#
+  , pattern N2048#
+  , pattern N4096#
     -- * Convert
   , demote
+  , demote#
   , unlift
   , lift
   , with
+  , with#
   ) where
 
 import Prelude hiding (succ)
@@ -55,9 +75,11 @@ import Prelude hiding (succ)
 import Arithmetic.Types
 import Arithmetic.Unsafe ((:=:)(Eq), type (<=)(Lte), (:=:#)(Eq#))
 import Arithmetic.Unsafe (Nat(Nat),Nat#(Nat#),type (<)(Lt),type (<#)(Lt#))
-import GHC.Exts (Proxy#,proxy#,(+#),(<#))
+import GHC.Exts (Proxy#,proxy#,(+#),(<#),Int#,(==#))
 import GHC.TypeNats (type (+),type (-),Div,KnownNat,natVal')
 import GHC.Int (Int(I#))
+import Data.Maybe.Void (MaybeVoid#, pattern JustVoid#, pattern NothingVoid#)
+import Data.Either.Void (EitherVoid#, pattern LeftVoid#, pattern RightVoid#)
 
 import qualified GHC.TypeNats as GHC
 
@@ -76,7 +98,7 @@ import qualified GHC.TypeNats as GHC
 {-# inline (=?) #-}
 (=?) = testEqual
 
-(<?#) :: Nat# a -> Nat# b -> (# (# #) | (a <# b) #)
+(<?#) :: Nat# a -> Nat# b -> MaybeVoid# (a <# b)
 {-# inline (<?#) #-}
 (<?#) = testLessThan#
 
@@ -88,11 +110,11 @@ testLessThan (Nat x) (Nat y) = if x < y
   then Just Lt
   else Nothing
 
-testLessThan# :: Nat# a -> Nat# b -> (# (# #) | (a <# b) #)
+testLessThan# :: Nat# a -> Nat# b -> MaybeVoid# (a <# b)
 {-# inline testLessThan# #-}
 testLessThan# (Nat# x) (Nat# y) = case x <# y of
-  0# -> (# (# #) | #)
-  _ -> (# | Lt# (# #) #)
+  0# -> NothingVoid#
+  _ -> JustVoid# (Lt# (# #))
 
 -- | Is the first argument less-than-or-equal-to the second
 -- argument?
@@ -109,6 +131,12 @@ testEqual (Nat x) (Nat y) = if x == y
   then Just Eq
   else Nothing
 
+testEqual# :: Nat# a -> Nat# b -> MaybeVoid# (a :=:# b)
+{-# inline testEqual# #-}
+testEqual# (Nat# x) (Nat# y) = case x ==# y of
+  0# -> NothingVoid#
+  _ -> JustVoid# (Eq# (# #))
+
 -- | Is zero equal to this number or less than it?
 testZero :: Nat a -> Either (0 :=: a) (0 < a)
 {-# inline testZero #-}
@@ -116,10 +144,10 @@ testZero (Nat x) = case x of
   0 -> Left Eq
   _ -> Right Lt
 
-testZero# :: Nat# a -> (# (0 :=:# a) | (0 <# a) #)
+testZero# :: Nat# a -> EitherVoid# (0 :=:# a) (0 <# a)
 testZero# (Nat# x) = case x of
-  0# -> (# Eq# (# #) | #)
-  _ -> (# | Lt# (# #) #)
+  0# -> LeftVoid# (Eq# (# #))
+  _ -> RightVoid# (Lt# (# #))
 
 -- | Add two numbers.
 plus :: Nat a -> Nat b -> Nat (a + b)
@@ -213,6 +241,10 @@ demote :: Nat n -> Int
 {-# inline demote #-}
 demote (Nat n) = n
 
+demote# :: Nat# n -> Int#
+{-# inline demote# #-}
+demote# (Nat# n) = n
+
 -- | Run a computation on a witness of a type-level number. The
 -- argument 'Int' must be greater than or equal to zero. This is
 -- not checked. Failure to upload this invariant will lead to a
@@ -221,6 +253,10 @@ with :: Int -> (forall n. Nat n -> a) -> a
 {-# inline with #-}
 with i f = f (Nat i)
 
+with# :: Int# -> (forall n. Nat# n -> a) -> a
+{-# inline with# #-}
+with# i f = f (Nat# i)
+
 unlift :: Nat n -> Nat# n
 {-# inline unlift #-}
 unlift (Nat (I# i)) = Nat# i
@@ -228,3 +264,48 @@ unlift (Nat (I# i)) = Nat# i
 lift :: Nat# n -> Nat n
 {-# inline lift #-}
 lift (Nat# i) = Nat (I# i)
+
+pattern N0# :: Nat# 0
+pattern N0# = Nat# 0#
+
+pattern N1# :: Nat# 1
+pattern N1# = Nat# 1#
+
+pattern N2# :: Nat# 2
+pattern N2# = Nat# 2#
+
+pattern N3# :: Nat# 3
+pattern N3# = Nat# 3#
+
+pattern N4# :: Nat# 4
+pattern N4# = Nat# 4#
+
+pattern N8# :: Nat# 8
+pattern N8# = Nat# 8#
+
+pattern N16# :: Nat# 16
+pattern N16# = Nat# 16#
+
+pattern N32# :: Nat# 32
+pattern N32# = Nat# 32#
+
+pattern N64# :: Nat# 64
+pattern N64# = Nat# 64#
+
+pattern N128# :: Nat# 128
+pattern N128# = Nat# 128#
+
+pattern N256# :: Nat# 256
+pattern N256# = Nat# 256#
+
+pattern N512# :: Nat# 512
+pattern N512# = Nat# 512#
+
+pattern N1024# :: Nat# 1024
+pattern N1024# = Nat# 1024#
+
+pattern N2048# :: Nat# 2048
+pattern N2048# = Nat# 2048#
+
+pattern N4096# :: Nat# 4096
+pattern N4096# = Nat# 4096#

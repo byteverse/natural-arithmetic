@@ -4,10 +4,12 @@
 {-# language GADTs #-}
 {-# language KindSignatures #-}
 {-# language MagicHash #-}
+{-# language PatternSynonyms #-}
 {-# language RankNTypes #-}
 {-# language ScopedTypeVariables #-}
 {-# language TypeApplications #-}
 {-# language TypeOperators #-}
+{-# language UnboxedTuples #-}
 module Arithmetic.Fin
   ( -- * Modification
     incrementL
@@ -17,6 +19,7 @@ module Arithmetic.Fin
   , weakenL
   , weakenR
   , succ
+  , succ#
     -- * Traverse
     -- | These use the terms @ascend@ and @descend@ rather than the
     -- more popular @l@ (left) and @r@ (right) that pervade the Haskell
@@ -61,7 +64,8 @@ import Prelude hiding (last,succ)
 
 import Arithmetic.Nat ((<?))
 import Arithmetic.Types (Fin(..),Difference(..),Nat,Nat#,type (<), type (<#), type (<=), type (:=:))
-import Arithmetic.Unsafe (Nat#(Nat#),Fin#(Fin#))
+import Arithmetic.Types (pattern MaybeFinNothing#, pattern MaybeFinJust#)
+import Arithmetic.Unsafe (Nat#(Nat#),Fin#(Fin#),MaybeFin#)
 import GHC.Exts (Int(I#),(+#),Int#,Word#)
 import GHC.TypeNats (type (+))
 
@@ -435,9 +439,9 @@ with :: Fin n -> (forall i. (i < n) -> Nat i -> a) -> a
 with (Fin i lt) f = f lt i
 
 -- | Variant of 'with' for unboxed argument and result types.
-with# :: Fin# n -> (forall i. (i < n) -> Nat# i -> a) -> a
+with# :: Fin# n -> (forall i. (i <# n) -> Nat# i -> a) -> a
 {-# inline with# #-}
-with# (Unsafe.Fin# i) f = f Unsafe.Lt (Unsafe.Nat# i)
+with# (Unsafe.Fin# i) f = f (Unsafe.Lt# (# #)) (Unsafe.Nat# i)
 
 construct# :: (i <# n) -> Nat# i -> Fin# n
 {-# inline construct# #-}
@@ -452,6 +456,15 @@ succ n (Fin ix _) = case ix' <? n of
   Just lt -> Just (Fin ix' lt)
   where
   ix' = Nat.succ ix
+
+-- | Variant of 'succ' for unlifted finite numbers.
+succ# :: Nat# n -> Fin# n -> MaybeFin# n
+{-# inline succ# #-}
+succ# (Nat# n) (Fin# ix) = case ix' Exts.<# n of
+  0# -> MaybeFinNothing#
+  _ -> MaybeFinJust# (Fin# ix')
+  where
+  !ix' = ix +# 1#
 
 -- | This crashes if @n = 0@. Divides @i@ by @n@ and takes
 -- the remainder.

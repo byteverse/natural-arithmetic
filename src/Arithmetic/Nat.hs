@@ -51,6 +51,9 @@ module Arithmetic.Nat
   , pattern N2#
   , pattern N3#
   , pattern N4#
+  , pattern N5#
+  , pattern N6#
+  , pattern N7#
   , pattern N8#
   , pattern N16#
   , pattern N32#
@@ -279,6 +282,15 @@ pattern N3# = Nat# 3#
 
 pattern N4# :: Nat# 4
 pattern N4# = Nat# 4#
+
+pattern N5# :: Nat# 5
+pattern N5# = Nat# 5#
+
+pattern N6# :: Nat# 6
+pattern N6# = Nat# 6#
+
+pattern N7# :: Nat# 7
+pattern N7# = Nat# 7#
 
 pattern N8# :: Nat# 8
 pattern N8# = Nat# 8#

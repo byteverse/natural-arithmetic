@@ -1,5 +1,15 @@
 # Revision history for natural-arithmetic
 
+## 0.2.0.0 -- 2024-01-09
+
+* Change the types of `with#` and `construct#` (both in `Arithmetic.Fin`)
+  to use an unboxed "less than" instead of a boxed one. This is a breaking
+  change.
+* Add patterns for the natural numbers 5, 6, 7.
+* Add a lot of primitives for working with unboxed natural and inequalities.
+  GHC is unable to eliminate the boxed `Fin` type in a suprisingly large
+  number of cases, and `Fin#` helps a lot with this.
+
 ## 0.1.4.0 -- 2023-05-31
 
 * Add unboxed Nat type

@@ -1,5 +1,9 @@
 # Revision history for natural-arithmetic
 
+## 0.2.1.0 -- 2024-??-??
+
+* Add `fromInt` and `fromInt#` to `Arithmetic.Fin`.
+
 ## 0.2.0.0 -- 2024-01-09
 
 * Change the types of `with#` and `construct#` (both in `Arithmetic.Fin`)

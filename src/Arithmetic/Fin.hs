@@ -55,6 +55,8 @@ module Arithmetic.Fin
   , construct#
   , remInt#
   , remWord#
+  , fromInt
+  , fromInt#
     -- * Lift and Unlift
   , lift
   , unlift
@@ -465,6 +467,32 @@ succ# (Nat# n) (Fin# ix) = case ix' Exts.<# n of
   _ -> MaybeFinJust# (Fin# ix')
   where
   !ix' = ix +# 1#
+
+-- | Convert an Int to a finite number, testing that it is
+-- less than the upper bound. This crashes with an uncatchable
+-- exception when given a negative number.
+fromInt ::
+     Nat n -- ^ exclusive upper bound
+  -> Int
+  -> Maybe (Fin n)
+{-# inline fromInt #-}
+fromInt bound i
+  | i < 0 = errorWithoutStackTrace "Arithmetic.Fin.fromInt: negative argument"
+  | otherwise = Nat.with i $ \number -> case number <? bound of
+      Just lt -> Just (Fin number lt)
+      Nothing -> Nothing
+
+-- | Unboxed variant of 'fromInt'.
+fromInt# ::
+     Nat# n -- ^ exclusive upper bound
+  -> Int#
+  -> MaybeFin# n
+{-# inline fromInt# #-}
+fromInt# (Nat# n) i
+  | Exts.isTrue# (i Exts.<# 0#) =
+      errorWithoutStackTrace "Arithmetic.Fin.fromInt#: negative argument"
+  | Exts.isTrue# (i Exts.<# n) = MaybeFinJust# (Fin# i)
+  | otherwise = MaybeFinNothing#
 
 -- | This crashes if @n = 0@. Divides @i@ by @n@ and takes
 -- the remainder.

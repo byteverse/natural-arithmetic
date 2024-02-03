@@ -1,8 +1,9 @@
 # Revision history for natural-arithmetic
 
-## 0.2.1.0 -- 2024-??-??
+## 0.2.1.0 -- 2024-02-02
 
 * Add `fromInt` and `fromInt#` to `Arithmetic.Fin`.
+* Update package metadata.
 
 ## 0.2.0.0 -- 2024-01-09
 

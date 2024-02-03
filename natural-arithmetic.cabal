@@ -1,7 +1,7 @@
-cabal-version: 2.2
-name: natural-arithmetic
-version: 0.2.1.0
-synopsis: Arithmetic of natural numbers
+cabal-version:   2.2
+name:            natural-arithmetic
+version:         0.2.1.0
+synopsis:        Arithmetic of natural numbers
 description:
   A search for terms like `arithmetic` and `natural` on hackage reveals
   no shortage of libraries for handling the arithmetic of natural
@@ -18,7 +18,7 @@ description:
   application code, not in library code. This is because libraries
   should not require the presence of typechecker plugins. Technically,
   they can (you could document it), but many developers will not
-  use libraries that have unusual install procedures like this. 
+  use libraries that have unusual install procedures like this.
   .
   This library, in places, requires users to use the 'TypeApplications`
   language extension. This is done when a number is only need at
@@ -28,7 +28,7 @@ description:
   in `Arithmetic.Lt` and `Arithmetic.Lte`. This is done in the interest
   of making it easy for user to assemble proofs. Recall that proof
   assembly is done by hand rather than by an SMT solver, so removing
-  some tediousness from this is helpful to users. 
+  some tediousness from this is helpful to users.
   .
   This library provides left and variants variants of several functions.
   For example, `Arithmetic.Lte` provides both `substituteL` and
@@ -54,29 +54,40 @@ description:
   * Decrement: Decrease an upper bound along with the bounded value
   .
   * Substitute: Replace a number with an equal number
-homepage: https://github.com/andrewthad/natural-arithmetic
-bug-reports: https://github.com/andrewthad/natural-arithmetic/issues
-license: BSD-3-Clause
-license-file: LICENSE
-author: Andrew Martin
-maintainer: andrew.thaddeus@gmail.com
-copyright: 2019 Andrew Martin
-category: Math
-extra-source-files: CHANGELOG.md
+
+homepage:        https://github.com/byteverse/natural-arithmetic
+bug-reports:     https://github.com/byteverse/natural-arithmetic/issues
+license:         BSD-3-Clause
+license-file:    LICENSE
+author:          Andrew Martin
+maintainer:      amartin@layer3com.com
+copyright:       2019 Andrew Martin
+category:        Math
+extra-doc-files: CHANGELOG.md
+
+common build-settings
+  default-language: Haskell2010
+  ghc-options:      -Wall -Wunused-packages
 
 library
+  import:          build-settings
   exposed-modules:
-    Arithmetic.Fin
     Arithmetic.Equal
+    Arithmetic.Fin
     Arithmetic.Lt
     Arithmetic.Lte
     Arithmetic.Nat
+    Arithmetic.Plus
     Arithmetic.Types
     Arithmetic.Unsafe
-    Arithmetic.Plus
+
   build-depends:
-    , base>=4.14 && <5
-    , unlifted >=0.2.1
-  hs-source-dirs: src
-  default-language: Haskell2010
-  ghc-options: -Wall -O2
+    , base      >=4.14  && <5
+    , unlifted  >=0.2.1
+
+  hs-source-dirs:  src
+  ghc-options:     -O2
+
+source-repository head
+  type:     git
+  location: git://github.com/byteverse/natural-arithmetic.git

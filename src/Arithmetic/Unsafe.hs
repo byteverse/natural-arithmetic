@@ -1,35 +1,34 @@
-{-# language DataKinds #-}
-{-# language DerivingStrategies #-}
-{-# language ExplicitNamespaces #-}
-{-# language GADTSyntax #-}
-{-# language GeneralizedNewtypeDeriving #-}
-{-# language KindSignatures #-}
-{-# language MagicHash #-}
-{-# language RoleAnnotations #-}
-{-# language StandaloneDeriving #-}
-{-# language TypeOperators #-}
-{-# language UnboxedTuples #-}
-{-# language UnliftedNewtypes #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DerivingStrategies #-}
+{-# LANGUAGE GADTSyntax #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE RoleAnnotations #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UnboxedTuples #-}
+{-# LANGUAGE UnliftedNewtypes #-}
 
 module Arithmetic.Unsafe
-  ( Nat(..)
-  , Nat#(..)
-  , Fin#(..)
-  , MaybeFin#(..)
-  , Fin32#(..)
-  , type (<#)(Lt#)
-  , type (<=#)(Lte#)
-  , type (<)(Lt)
-  , type (<=)(Lte)
-  , type (:=:)(Eq)
-  , type (:=:#)(Eq#)
+  ( Nat (..)
+  , Nat# (..)
+  , Fin# (..)
+  , MaybeFin# (..)
+  , Fin32# (..)
+  , type (<#) (Lt#)
+  , type (<=#) (Lte#)
+  , type (<) (Lt)
+  , type (<=) (Lte)
+  , type (:=:) (Eq)
+  , type (:=:#) (Eq#)
   ) where
 
-import Prelude hiding ((>=),(<=))
+import Prelude hiding ((<=), (>=))
 
 import Control.Category (Category)
 import Data.Kind (Type)
-import GHC.Exts (Int#,Int32#,TYPE,RuntimeRep(IntRep,Int32Rep,TupleRep))
+import GHC.Exts (Int#, Int32#, RuntimeRep (Int32Rep, IntRep, TupleRep), TYPE)
 
 import qualified Control.Category
 import qualified GHC.TypeNats as GHC
@@ -48,7 +47,8 @@ infix 4 :=:
 infix 4 :=:#
 
 -- | A value-level representation of a natural number @n@.
-newtype Nat (n :: GHC.Nat) = Nat { getNat :: Int }
+newtype Nat (n :: GHC.Nat) = Nat {getNat :: Int}
+
 type role Nat nominal
 
 deriving newtype instance Show (Nat n)
@@ -56,34 +56,41 @@ deriving newtype instance Show (Nat n)
 -- | Unboxed variant of Nat.
 newtype Nat# :: GHC.Nat -> TYPE 'IntRep where
   Nat# :: Int# -> Nat# n
+
 type role Nat# nominal
 
 -- | Finite numbers without the overhead of carrying around a proof.
 newtype Fin# :: GHC.Nat -> TYPE 'IntRep where
   Fin# :: Int# -> Fin# n
+
 type role Fin# nominal
 
--- | Either a @Fin#@ or Nothing. Internally, this uses negative
--- one to mean Nothing.
+{- | Either a @Fin#@ or Nothing. Internally, this uses negative
+one to mean Nothing.
+-}
 newtype MaybeFin# :: GHC.Nat -> TYPE 'IntRep where
   MaybeFin# :: Int# -> MaybeFin# n
+
 type role MaybeFin# nominal
 
 -- | Variant of 'Fin#' that only allows 32-bit integers.
 newtype Fin32# :: GHC.Nat -> TYPE 'Int32Rep where
   Fin32# :: Int32# -> Fin32# n
+
 type role Fin32# nominal
 
--- | Proof that the first argument is strictly less than the
--- second argument.
+{- | Proof that the first argument is strictly less than the
+second argument.
+-}
 data (<) :: GHC.Nat -> GHC.Nat -> Type where
   Lt :: a < b
 
 newtype (<#) :: GHC.Nat -> GHC.Nat -> TYPE ('TupleRep '[]) where
   Lt# :: (# #) -> a <# b
 
--- | Proof that the first argument is less than or equal to the
--- second argument.
+{- | Proof that the first argument is less than or equal to the
+second argument.
+-}
 data (<=) :: GHC.Nat -> GHC.Nat -> Type where
   Lte :: a <= b
 

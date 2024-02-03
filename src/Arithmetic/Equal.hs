@@ -1,9 +1,9 @@
-{-# language DataKinds #-}
-{-# language ExplicitForAll #-}
-{-# language KindSignatures #-}
-{-# language MagicHash #-}
-{-# language TypeOperators #-}
-{-# language UnboxedTuples #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UnboxedTuples #-}
 
 module Arithmetic.Equal
   ( symmetric
@@ -14,29 +14,29 @@ module Arithmetic.Equal
   , lift
   ) where
 
-import Arithmetic.Unsafe (type (:=:)(Eq), type (:=:#)(Eq#))
+import Arithmetic.Unsafe (type (:=:) (Eq), type (:=:#) (Eq#))
 import GHC.TypeNats (type (+))
 
 symmetric :: (m :=: n) -> (n :=: m)
-{-# inline symmetric #-}
+{-# INLINE symmetric #-}
 symmetric Eq = Eq
 
 plusL :: forall c m n. (m :=: n) -> (c + m :=: c + n)
-{-# inline plusL #-}
+{-# INLINE plusL #-}
 plusL Eq = Eq
 
 plusR :: forall c m n. (m :=: n) -> (m + c :=: n + c)
-{-# inline plusR #-}
+{-# INLINE plusR #-}
 plusR Eq = Eq
 
 plusL# :: forall c m n. (m :=:# n) -> (c + m :=:# c + n)
-{-# inline plusL# #-}
+{-# INLINE plusL# #-}
 plusL# _ = Eq# (# #)
 
 plusR# :: forall c m n. (m :=:# n) -> (m + c :=:# n + c)
-{-# inline plusR# #-}
+{-# INLINE plusR# #-}
 plusR# _ = Eq# (# #)
 
 lift :: (m :=:# n) -> (m :=: n)
-{-# inline lift #-}
+{-# INLINE lift #-}
 lift _ = Eq

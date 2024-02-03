@@ -1,8 +1,8 @@
-{-# language DataKinds #-}
-{-# language TypeOperators #-}
-{-# language KindSignatures #-}
-{-# language ExplicitForAll #-}
-{-# language AllowAmbiguousTypes #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Arithmetic.Plus
   ( zeroL
@@ -11,7 +11,7 @@ module Arithmetic.Plus
   , associative
   ) where
 
-import Arithmetic.Unsafe (type (:=:)(Eq))
+import Arithmetic.Unsafe (type (:=:) (Eq))
 import GHC.TypeNats (type (+))
 
 -- | Any number plus zero is equal to the original number.

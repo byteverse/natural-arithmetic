@@ -79,7 +79,7 @@ instance Ord (Fin n) where
 pattern EitherFinLeft# :: Fin# m -> EitherFin# m n
 pattern EitherFinLeft# f <- (eitherFinToSum# -> (# f | #))
   where
-    EitherFinLeft# (Fin# i) = EitherFin# (1# -# i)
+    EitherFinLeft# (Fin# i) = EitherFin# ((-1#) -# i)
 
 pattern EitherFinRight# :: Fin# n -> EitherFin# m n
 pattern EitherFinRight# f <- (eitherFinToSum# -> (# | f #))

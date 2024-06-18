@@ -15,6 +15,7 @@ module Arithmetic.Unsafe
   , Nat# (..)
   , Fin# (..)
   , MaybeFin# (..)
+  , EitherFin# (..)
   , Fin32# (..)
   , type (<#) (Lt#)
   , type (<=#) (Lte#)
@@ -72,6 +73,16 @@ newtype MaybeFin# :: GHC.Nat -> TYPE 'IntRep where
   MaybeFin# :: Int# -> MaybeFin# n
 
 type role MaybeFin# nominal
+
+{- | Either a @Fin#@ bounded by the left natural or one bounded
+by the right natural.
+-}
+newtype EitherFin# :: GHC.Nat -> GHC.Nat -> TYPE 'IntRep where
+  -- Implementation note: Left is represented by (-m + 1), and
+  -- right is represented by n.
+  EitherFin# :: Int# -> EitherFin# m n
+
+type role EitherFin# nominal nominal
 
 -- | Variant of 'Fin#' that only allows 32-bit integers.
 newtype Fin32# :: GHC.Nat -> TYPE 'Int32Rep where

@@ -22,6 +22,11 @@ module Arithmetic.Types
   , pattern MaybeFinJust#
   , pattern MaybeFinNothing#
 
+    -- * Either Fin
+  , EitherFin#
+  , pattern EitherFinLeft#
+  , pattern EitherFinRight#
+
     -- * Infix Operators
   , type (<)
   , type (<=)
@@ -31,8 +36,9 @@ module Arithmetic.Types
   , type (:=:#)
   ) where
 
-import Arithmetic.Unsafe (Fin# (Fin#), Fin32#, MaybeFin# (..), Nat (getNat), Nat#, (:=:#), type (:=:), type (<), type (<#), type (<=), type (<=#))
+import Arithmetic.Unsafe (EitherFin# (..), Fin# (Fin#), Fin32#, MaybeFin# (..), Nat (getNat), Nat#, (:=:#), type (:=:), type (<), type (<#), type (<=), type (<=#))
 import Data.Kind (type Type)
+import GHC.Exts ((-#), (<#))
 import GHC.TypeNats (type (+))
 
 import qualified GHC.TypeNats as GHC
@@ -69,6 +75,21 @@ instance Eq (Fin n) where
 
 instance Ord (Fin n) where
   Fin x _ `compare` Fin y _ = compare (getNat x) (getNat y)
+
+pattern EitherFinLeft# :: Fin# m -> EitherFin# m n
+pattern EitherFinLeft# f <- (eitherFinToSum# -> (# f | #))
+  where
+    EitherFinLeft# (Fin# i) = EitherFin# ((-1#) -# i)
+
+pattern EitherFinRight# :: Fin# n -> EitherFin# m n
+pattern EitherFinRight# f <- (eitherFinToSum# -> (# | f #))
+  where
+    EitherFinRight# (Fin# i) = EitherFin# i
+
+eitherFinToSum# :: EitherFin# m n -> (# Fin# m | Fin# n #)
+eitherFinToSum# (EitherFin# i) = case i <# 0# of
+  1# -> (# Fin# ((-1#) -# i) | #)
+  _ -> (# | Fin# i #)
 
 pattern MaybeFinJust# :: Fin# n -> MaybeFin# n
 pattern MaybeFinJust# f <- (maybeFinToFin# -> (# | f #))

@@ -65,6 +65,9 @@ module Arithmetic.Fin
   , fromInt#
   , constant#
 
+    -- * Compare
+  , equals#
+
     -- * Lift and Unlift
   , lift
   , unlift
@@ -75,7 +78,7 @@ import Prelude hiding (last, succ)
 import Arithmetic.Nat ((<?))
 import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=))
 import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#))
-import GHC.Exts (Int (I#), Int#, Word#, (+#))
+import GHC.Exts (Int (I#), Int#, Word#, (+#), (==#))
 import GHC.TypeNats (CmpNat, type (+))
 
 import qualified Arithmetic.Equal as Eq
@@ -610,3 +613,6 @@ type applications to clarify when it is helpful. For example:
 -}
 constant# :: forall (b :: GHC.Nat) (a :: GHC.Nat). (CmpNat a b ~ 'LT) => Nat# a -> Fin# b
 constant# (Nat# i) = Fin# i
+
+equals# :: Fin# n -> Fin# n -> Bool
+equals# (Fin# a) (Fin# b) = Exts.isTrue# (a ==# b)

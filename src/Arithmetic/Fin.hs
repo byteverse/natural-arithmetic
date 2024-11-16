@@ -63,6 +63,10 @@ module Arithmetic.Fin
   , remWord#
   , fromInt
   , fromInt#
+  , constant#
+
+    -- * Compare
+  , equals#
 
     -- * Lift and Unlift
   , lift
@@ -74,8 +78,8 @@ import Prelude hiding (last, succ)
 import Arithmetic.Nat ((<?))
 import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=))
 import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#))
-import GHC.Exts (Int (I#), Int#, Word#, (+#))
-import GHC.TypeNats (type (+))
+import GHC.Exts (Int (I#), Int#, Word#, (+#), (==#))
+import GHC.TypeNats (CmpNat, type (+))
 
 import qualified Arithmetic.Equal as Eq
 import qualified Arithmetic.Lt as Lt
@@ -84,6 +88,7 @@ import qualified Arithmetic.Nat as Nat
 import qualified Arithmetic.Plus as Plus
 import qualified Arithmetic.Unsafe as Unsafe
 import qualified GHC.Exts as Exts
+import qualified GHC.TypeNats as GHC
 
 {- | Raise the index by @m@ and weaken the bound by @m@, adding
 @m@ to the right-hand side of @n@.
@@ -599,3 +604,15 @@ remWord# :: Word# -> Nat# n -> Fin# n
 remWord# w (Nat# n) = case n of
   0# -> errorWithoutStackTrace "Arithmetic.Fin.remWord#: cannot divide by zero"
   _ -> Fin# (Exts.word2Int# (Exts.remWord# w (Exts.int2Word# n)))
+
+{- | Create an unlifted finite number from an unlifted natural number.
+The upper bound is the first type argument so that user can use
+type applications to clarify when it is helpful. For example:
+
+>>> Fin.constant# @10 N4#
+-}
+constant# :: forall (b :: GHC.Nat) (a :: GHC.Nat). (CmpNat a b ~ 'LT) => Nat# a -> Fin# b
+constant# (Nat# i) = Fin# i
+
+equals# :: Fin# n -> Fin# n -> Bool
+equals# (Fin# a) (Fin# b) = Exts.isTrue# (a ==# b)

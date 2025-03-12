@@ -70,6 +70,8 @@ module Arithmetic.Nat
   , pattern N1024#
   , pattern N2048#
   , pattern N4096#
+  , pattern N8192#
+  , pattern N16384#
 
     -- * Convert
   , demote
@@ -337,3 +339,9 @@ pattern N2048# = Nat# 2048#
 
 pattern N4096# :: Nat# 4096
 pattern N4096# = Nat# 4096#
+
+pattern N8192# :: Nat# 8192
+pattern N8192# = Nat# 8192#
+
+pattern N16384# :: Nat# 16384
+pattern N16384# = Nat# 16384#

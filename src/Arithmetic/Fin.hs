@@ -17,7 +17,9 @@ module Arithmetic.Fin
   , incrementR#
   , weaken
   , weakenL
+  , weakenL#
   , weakenR
+  , weakenR#
   , succ
   , succ#
 
@@ -52,6 +54,7 @@ module Arithmetic.Fin
     -- * Demote
   , demote
   , demote#
+  , demote32#
 
     -- * Deconstruct
   , with
@@ -77,8 +80,8 @@ import Prelude hiding (last, succ)
 
 import Arithmetic.Nat ((<?))
 import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=))
-import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#))
-import GHC.Exts (Int (I#), Int#, Word#, (+#), (==#))
+import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#), Fin32#(Fin32#))
+import GHC.Exts (Int (I#), Int32#, Int#, Word#, (+#), (==#))
 import GHC.TypeNats (CmpNat, type (+))
 
 import qualified Arithmetic.Equal as Eq
@@ -121,12 +124,24 @@ weakenL (Fin i pf) =
         (Lt.plus pf (Lte.zero @m))
     )
 
+{- | Unboxed variant of 'weakenL'.
+-}
+weakenL# :: forall n m. Fin# n -> Fin# (m + n)
+{-# INLINE weakenL# #-}
+weakenL# (Fin# i) = Fin# i
+
 {- | Weaken the bound by @m@, adding it to the right-hand side of
 the existing bound. This does not change the index.
 -}
 weakenR :: forall n m. Fin n -> Fin (n + m)
 {-# INLINE weakenR #-}
 weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
+
+{- | Unboxed variant of 'weakenR'.
+-}
+weakenR# :: forall n m. Fin# n -> Fin# (n + m)
+{-# INLINE weakenR# #-}
+weakenR# (Fin# i) = Fin# i
 
 {- | Weaken the bound, replacing it by another number greater than
 or equal to itself. This does not change the index.
@@ -517,6 +532,10 @@ demote (Fin i _) = Nat.demote i
 demote# :: Fin# n -> Int#
 {-# INLINE demote# #-}
 demote# (Fin# i) = i
+
+demote32# :: Fin32# n -> Int32#
+{-# INLINE demote32# #-}
+demote32# (Fin32# i) = i
 
 lift :: Unsafe.Fin# n -> Fin n
 {-# INLINE lift #-}

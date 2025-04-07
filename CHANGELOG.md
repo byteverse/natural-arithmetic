@@ -1,5 +1,15 @@
 # Revision history for natural-arithmetic
 
+## 0.2.2.0 -- 2025-04-07
+
+* Add Fin.weakenL#
+* Add Fin.weakenR#
+* Add Fin.demote32#
+* Add Fin.constant#
+* Add Fin.equals#
+* Add more nat constants (N8192# and N16384#)
+* Add EitherFin#
+
 ## 0.2.1.0 -- 2024-02-02
 
 * Add `fromInt` and `fromInt#` to `Arithmetic.Fin`.

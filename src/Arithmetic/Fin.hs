@@ -38,6 +38,7 @@ module Arithmetic.Fin
   , ascendM#
   , ascendM_
   , ascendM_#
+  , ascendFromToM_#
   , descend
   , descend#
   , descend'
@@ -78,9 +79,10 @@ module Arithmetic.Fin
 
 import Prelude hiding (last, succ)
 
-import Arithmetic.Nat ((<?))
+import Arithmetic.Nat ((<?),(<?#))
 import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=))
 import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#), Fin32#(Fin32#))
+import Data.Maybe.Void (pattern JustVoid#)
 import GHC.Exts (Int (I#), Int32#, Int#, Word#, (+#), (==#))
 import GHC.TypeNats (CmpNat, type (+))
 
@@ -361,6 +363,23 @@ ascendM_ !n f = go Nat.zero
   go !m = case m <? n of
     Nothing -> pure ()
     Just lt -> f (Fin m lt) *> go (Nat.succ m)
+
+ascendFromToM_# ::
+  forall m a i n.
+  (Monad m) =>
+  -- | Index to start at (inclusive)
+  Nat# i ->
+  -- | Upper bound (exclusive)
+  Nat# n ->
+  -- | Update accumulator
+  (Fin# n -> m a) ->
+  m ()
+ascendFromToM_# m0 end f = go m0
+  where
+  go :: forall k. Nat# k -> m ()
+  go m = case m <?# end of
+    JustVoid# lt -> f (construct# lt m) *> go (Nat.succ# m)
+    _ -> pure ()
 
 {- | Variant of @ascendM_@ that takes an unboxed Nat and provides
 an unboxed Fin to the callback.

@@ -66,6 +66,7 @@ module Arithmetic.Fin
     -- * Construct
   , construct#
   , nativeTo32#
+  , nativeFrom32#
   , remInt#
   , remWord#
   , fromInt
@@ -656,7 +657,12 @@ remWord# w (Nat# n) = case n of
   _ -> Fin# (Exts.word2Int# (Exts.remWord# w (Exts.int2Word# n)))
 
 nativeTo32# :: (n <=# 2147483648) -> Fin# n -> Fin32# n
+{-# inline nativeTo32# #-}
 nativeTo32# _ (Fin# x) = Fin32# (Exts.intToInt32# x)
+
+nativeFrom32# :: Fin32# n -> Fin# n
+{-# inline nativeFrom32# #-}
+nativeFrom32# (Fin32# x) = Fin# (Exts.int32ToInt# x)
 
 {- | Create an unlifted finite number from an unlifted natural number.
 The upper bound is the first type argument so that user can use

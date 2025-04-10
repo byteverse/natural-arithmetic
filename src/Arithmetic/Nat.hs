@@ -32,12 +32,14 @@ module Arithmetic.Nat
   , testLessThan
   , testLessThan#
   , testLessThanEqual
+  , testLessThanEqual#
   , testZero
   , testZero#
   , (=?)
   , (<?)
   , (<?#)
   , (<=?)
+  , (<=?#)
 
     -- * Constants
   , zero
@@ -86,6 +88,7 @@ import Prelude hiding (succ)
 
 import Arithmetic.Types
 import Arithmetic.Unsafe (Nat (Nat), Nat# (Nat#), (:=:) (Eq), (:=:#) (Eq#), type (<) (Lt), type (<#) (Lt#), type (<=) (Lte))
+import Arithmetic.Unsafe (type (<=#) (Lte#))
 import Data.Either.Void (EitherVoid#, pattern LeftVoid#, pattern RightVoid#)
 import Data.Maybe.Void (MaybeVoid#, pattern JustVoid#, pattern NothingVoid#)
 import GHC.Exts (Int#, Proxy#, proxy#, (+#), (<#), (==#))
@@ -113,6 +116,10 @@ import qualified GHC.TypeNats as GHC
 {-# INLINE (<?#) #-}
 (<?#) = testLessThan#
 
+(<=?#) :: Nat# a -> Nat# b -> MaybeVoid# (a <=# b)
+{-# INLINE (<=?#) #-}
+(<=?#) = testLessThanEqual#
+
 {- | Is the first argument strictly less than the second
 argument?
 -}
@@ -138,6 +145,12 @@ testLessThanEqual (Nat x) (Nat y) =
   if x <= y
     then Just Lte
     else Nothing
+
+testLessThanEqual# :: Nat# a -> Nat# b -> MaybeVoid# (a <=# b)
+{-# INLINE testLessThanEqual# #-}
+testLessThanEqual# (Nat# x) (Nat# y) = case x <# y of
+  0# -> NothingVoid#
+  _ -> JustVoid# (Lte# (# #))
 
 -- | Are the two arguments equal to one another?
 testEqual :: Nat a -> Nat b -> Maybe (a :=: b)

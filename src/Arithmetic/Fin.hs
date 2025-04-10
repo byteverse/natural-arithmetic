@@ -13,6 +13,7 @@
 module Arithmetic.Fin
   ( -- * Modification
     incrementL
+  , incrementL#
   , incrementR
   , incrementR#
   , weaken
@@ -114,6 +115,10 @@ incrementR# (Nat# n) (Fin# i) = Fin# (n +# i)
 incrementL :: forall n m. Nat m -> Fin n -> Fin (m + n)
 {-# INLINE incrementL #-}
 incrementL m (Fin i pf) = Fin (Nat.plus m i) (Lt.incrementL @m pf)
+
+incrementL# :: forall n m. Nat# m -> Fin# n -> Fin# (m + n)
+{-# INLINE incrementL# #-}
+incrementL# (Nat# n) (Fin# i) = Fin# (n +# i)
 
 {- | Weaken the bound by @m@, adding it to the left-hand side of
 the existing bound. This does not change the index.

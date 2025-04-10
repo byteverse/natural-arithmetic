@@ -16,6 +16,7 @@ module Arithmetic.Fin
   , incrementR
   , incrementR#
   , weaken
+  , weaken#
   , weakenL
   , weakenL#
   , weakenR
@@ -81,6 +82,7 @@ import Prelude hiding (last, succ)
 
 import Arithmetic.Nat ((<?),(<?#))
 import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=))
+import Arithmetic.Types (type (<=#))
 import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#), Fin32#(Fin32#))
 import Data.Maybe.Void (pattern JustVoid#)
 import GHC.Exts (Int (I#), Int32#, Int#, Word#, (+#), (==#))
@@ -151,6 +153,10 @@ or equal to itself. This does not change the index.
 weaken :: forall n m. (n <= m) -> Fin n -> Fin m
 {-# INLINE weaken #-}
 weaken lt (Fin i pf) = Fin i (Lt.transitiveNonstrictR pf lt)
+
+weaken# :: forall n m. (n <=# m) -> Fin# n -> Fin# m
+{-# INLINE weaken# #-}
+weaken# _ (Fin# x) = Fin# x
 
 -- | A finite set of no values is impossible.
 absurd :: Fin 0 -> void

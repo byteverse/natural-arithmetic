@@ -12,6 +12,7 @@ module Arithmetic.Equal
   , plusR#
   , plusL#
   , lift
+  , unlift
   ) where
 
 import Arithmetic.Unsafe (type (:=:) (Eq), type (:=:#) (Eq#))
@@ -40,3 +41,7 @@ plusR# _ = Eq# (# #)
 lift :: (m :=:# n) -> (m :=: n)
 {-# INLINE lift #-}
 lift _ = Eq
+
+unlift :: (m :=: n) -> (m :=:# n)
+{-# INLINE unlift #-}
+unlift _ = Eq# (# #)

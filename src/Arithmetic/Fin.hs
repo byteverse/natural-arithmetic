@@ -76,6 +76,9 @@ module Arithmetic.Fin
     -- * Compare
   , equals#
 
+    -- * Substitute Bound
+  , substitute#
+
     -- * Lift and Unlift
   , lift
   , unlift
@@ -84,7 +87,7 @@ module Arithmetic.Fin
 import Prelude hiding (last, succ)
 
 import Arithmetic.Nat ((<?),(<?#))
-import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=))
+import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=), (:=:#))
 import Arithmetic.Types (type (<=#))
 import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#), Fin32#(Fin32#))
 import Data.Maybe.Void (pattern JustVoid#)
@@ -675,3 +678,6 @@ constant# (Nat# i) = Fin# i
 
 equals# :: Fin# n -> Fin# n -> Bool
 equals# (Fin# a) (Fin# b) = Exts.isTrue# (a ==# b)
+
+substitute# :: (m :=:# n) -> Fin# m -> Fin# n
+substitute# _ (Fin# x) = Fin# x

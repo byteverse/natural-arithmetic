@@ -13,7 +13,9 @@ module Arithmetic.Lte
 
     -- * Substitution
   , substituteL
+  , substituteL#
   , substituteR
+  , substituteR#
 
     -- * Increment
   , incrementL
@@ -54,6 +56,7 @@ module Arithmetic.Lte
   ) where
 
 import Arithmetic.Unsafe (type (:=:) (Eq), type (<) (Lt), type (<#), type (<=) (Lte), type (<=#) (Lte#))
+import Arithmetic.Unsafe (type (:=:#))
 import GHC.TypeNats (CmpNat, type (+))
 
 import qualified GHC.TypeNats as GHC
@@ -71,6 +74,14 @@ with an equal number.
 substituteR :: (b :=: c) -> (a <= b) -> (a <= c)
 {-# INLINE substituteR #-}
 substituteR Eq Lte = Lte
+
+substituteL# :: (b :=:# c) -> (b <=# a) -> (c <=# a)
+{-# INLINE substituteL# #-}
+substituteL# _ _ = Lte# (# #)
+
+substituteR# :: (b :=:# c) -> (a <=# b) -> (a <=# c)
+{-# INLINE substituteR# #-}
+substituteR# _ _ = Lte# (# #)
 
 -- | Add two inequalities.
 plus :: (a <= b) -> (c <= d) -> (a + c <= b + d)

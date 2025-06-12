@@ -1,6 +1,6 @@
 cabal-version:   2.2
 name:            natural-arithmetic
-version:         0.2.2.0
+version:         0.2.3.0
 synopsis:        Arithmetic of natural numbers
 description:
   A search for terms like `arithmetic` and `natural` on hackage reveals

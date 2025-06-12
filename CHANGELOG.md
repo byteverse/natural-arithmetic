@@ -1,5 +1,19 @@
 # Revision history for natural-arithmetic
 
+## 0.2.3.0 -- 2025-06-12
+
+* Add Fin.greatest#
+* Add Plus.commutative#
+* Add substitution functions for unlifted less-than-or-equal-to
+* Add Nat.substitute#
+* Add Eq.symmetric#
+* Add nativeFrom32#
+* Add incrementL#
+* Add testLessThanEqual#
+* Add nativeTo32#
+* Add Fin.ascendFromToM_#
+* Add Fin.weaken#
+
 ## 0.2.2.0 -- 2025-04-07
 
 * Add Fin.weakenL#

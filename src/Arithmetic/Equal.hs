@@ -7,6 +7,7 @@
 
 module Arithmetic.Equal
   ( symmetric
+  , symmetric#
   , plusR
   , plusL
   , plusR#
@@ -21,6 +22,10 @@ import GHC.TypeNats (type (+))
 symmetric :: (m :=: n) -> (n :=: m)
 {-# INLINE symmetric #-}
 symmetric Eq = Eq
+
+symmetric# :: (m :=:# n) -> (n :=:# m)
+{-# INLINE symmetric# #-}
+symmetric# _ = Eq# (# #)
 
 plusL :: forall c m n. (m :=: n) -> (c + m :=: c + n)
 {-# INLINE plusL #-}

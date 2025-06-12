@@ -82,6 +82,9 @@ module Arithmetic.Nat
   , lift
   , with
   , with#
+
+    -- * Substitute
+  , substitute#
   ) where
 
 import Prelude hiding (succ)
@@ -358,3 +361,6 @@ pattern N8192# = Nat# 8192#
 
 pattern N16384# :: Nat# 16384
 pattern N16384# = Nat# 16384#
+
+substitute# :: (m :=:# n) -> Nat# m -> Nat# n
+substitute# _ (Nat# x) = Nat# x

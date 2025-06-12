@@ -72,6 +72,7 @@ module Arithmetic.Fin
   , fromInt
   , fromInt#
   , constant#
+  , greatest#
 
     -- * Compare
   , equals#
@@ -681,3 +682,6 @@ equals# (Fin# a) (Fin# b) = Exts.isTrue# (a ==# b)
 
 substitute# :: (m :=:# n) -> Fin# m -> Fin# n
 substitute# _ (Fin# x) = Fin# x
+
+greatest# :: Nat# n -> Fin# (n + 1)
+greatest# (Nat# i) = Fin# i

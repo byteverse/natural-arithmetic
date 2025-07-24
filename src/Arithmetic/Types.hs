@@ -21,6 +21,9 @@ module Arithmetic.Types
   , MaybeFin#
   , pattern MaybeFinJust#
   , pattern MaybeFinNothing#
+  , MaybeFin32#
+  , pattern MaybeFin32Just#
+  , pattern MaybeFin32Nothing#
 
     -- * Either Fin
   , EitherFin#
@@ -36,12 +39,13 @@ module Arithmetic.Types
   , type (:=:#)
   ) where
 
-import Arithmetic.Unsafe (EitherFin# (..), Fin# (Fin#), Fin32#, MaybeFin# (..), Nat (getNat), Nat#, (:=:#), type (:=:), type (<), type (<#), type (<=), type (<=#))
+import Arithmetic.Unsafe (EitherFin# (..), Fin# (Fin#), Fin32# (Fin32#), MaybeFin# (..), MaybeFin32# (..), Nat (getNat), Nat#, (:=:#), type (:=:), type (<), type (<#), type (<=), type (<=#))
 import Data.Kind (type Type)
 import GHC.Exts ((-#), (<#))
 import GHC.TypeNats (type (+))
 
 import qualified GHC.TypeNats as GHC
+import qualified GHC.Exts as Exts
 
 data WithNat :: (GHC.Nat -> Type) -> Type where
   WithNat ::
@@ -99,8 +103,30 @@ pattern MaybeFinJust# f <- (maybeFinToFin# -> (# | f #))
 pattern MaybeFinNothing# :: MaybeFin# n
 pattern MaybeFinNothing# = MaybeFin# (-1#)
 
+pattern MaybeFin32Just# :: Fin32# n -> MaybeFin32# n
+pattern MaybeFin32Just# f <- (maybeFin32ToFin32# -> (# | f #))
+  where
+    MaybeFin32Just# (Fin32# i) = MaybeFin32# i
+
+pattern MaybeFin32Nothing# :: MaybeFin32# n
+pattern MaybeFin32Nothing# <- (isNegativeOne32 -> True)
+  where
+    MaybeFin32Nothing# = MaybeFin32# (Exts.intToInt32# (-1#))
+
+isNegativeOne32 :: MaybeFin32# n -> Bool
+{-# INLINE isNegativeOne32 #-}
+isNegativeOne32 (MaybeFin32# x) = case Exts.int32ToInt# x of
+  (-1#) -> True
+  _ -> False
+
 maybeFinToFin# :: MaybeFin# n -> (# (# #) | Fin# n #)
 {-# INLINE maybeFinToFin# #-}
 maybeFinToFin# (MaybeFin# i) = case i of
   -1# -> (# (# #) | #)
   _ -> (# | Fin# i #)
+
+maybeFin32ToFin32# :: MaybeFin32# n -> (# (# #) | Fin32# n #)
+{-# INLINE maybeFin32ToFin32# #-}
+maybeFin32ToFin32# (MaybeFin32# i) = case Exts.int32ToInt# i of
+  -1# -> (# (# #) | #)
+  _ -> (# | Fin32# i #)

@@ -22,8 +22,11 @@ module Arithmetic.Fin
   , weakenL#
   , weakenR
   , weakenR#
+  , weaken32R#
   , succ
   , succ#
+  , succ32#
+  , pred32#
 
     -- * Traverse
 
@@ -65,6 +68,7 @@ module Arithmetic.Fin
 
     -- * Construct
   , construct#
+  , construct32#
   , nativeTo32#
   , nativeFrom32#
   , remInt#
@@ -73,6 +77,7 @@ module Arithmetic.Fin
   , fromInt#
   , constant#
   , greatest#
+  , greatest32#
 
     -- * Compare
   , equals#
@@ -88,9 +93,9 @@ module Arithmetic.Fin
 import Prelude hiding (last, succ)
 
 import Arithmetic.Nat ((<?),(<?#))
-import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, type (:=:), type (<), type (<#), type (<=), (:=:#))
+import Arithmetic.Types (Difference (..), Fin (..), Nat, Nat#, pattern MaybeFinJust#, pattern MaybeFinNothing#, pattern MaybeFin32Nothing#, pattern MaybeFin32Just#, type (:=:), type (<), type (<#), type (<=), (:=:#))
 import Arithmetic.Types (type (<=#))
-import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#), Fin32#(Fin32#))
+import Arithmetic.Unsafe (Fin# (Fin#), MaybeFin#, Nat# (Nat#), Fin32#(Fin32#), MaybeFin32#(MaybeFin32#))
 import Data.Maybe.Void (pattern JustVoid#)
 import GHC.Exts (Int (I#), Int32#, Int#, Word#, (+#), (==#))
 import GHC.TypeNats (CmpNat, type (+))
@@ -157,6 +162,12 @@ weakenR (Fin i pf) = Fin i (Lt.plus pf Lte.zero)
 weakenR# :: forall n m. Fin# n -> Fin# (n + m)
 {-# INLINE weakenR# #-}
 weakenR# (Fin# i) = Fin# i
+
+{- | Unboxed variant of 'weakenR'.
+-}
+weaken32R# :: forall n m. Fin32# n -> Fin32# (n + m)
+{-# INLINE weaken32R# #-}
+weaken32R# (Fin32# i) = Fin32# i
 
 {- | Weaken the bound, replacing it by another number greater than
 or equal to itself. This does not change the index.
@@ -595,6 +606,10 @@ construct# :: (i <# n) -> Nat# i -> Fin# n
 {-# INLINE construct# #-}
 construct# _ (Unsafe.Nat# x) = Unsafe.Fin# x
 
+construct32# :: (n <=# 2147483648) -> (i <# n) -> Nat# i -> Fin32# n
+{-# INLINE construct32# #-}
+construct32# _ _ (Unsafe.Nat# x) = Unsafe.Fin32# (Exts.intToInt32# x)
+
 {- | Return the successor of the Fin or return nothing if the
 argument is the greatest inhabitant.
 -}
@@ -614,6 +629,25 @@ succ# (Nat# n) (Fin# ix) = case ix' Exts.<# n of
   _ -> MaybeFinJust# (Fin# ix')
  where
   !ix' = ix +# 1#
+
+-- | Variant of 'succ' for unlifted 32-bit finite numbers.
+--
+-- The implementation of this is kind of weird because we have to
+-- worry about overflow.
+succ32# :: (n <=# 2147483648) -> Nat# n -> Fin32# n -> MaybeFin32# n
+{-# INLINE succ32# #-}
+succ32# _ (Nat# n) (Fin32# ix) =
+  case ix' Exts.<# n of
+    0# -> MaybeFin32Nothing#
+    _ -> MaybeFin32Just# (Fin32# (Exts.intToInt32# ix'))
+ where
+  !ix' = Exts.int32ToInt# ix +# 1#
+
+pred32# :: Fin32# n -> MaybeFin32# n
+{-# inline pred32# #-}
+pred32# (Fin32# x) = case Exts.int32ToInt# x of
+  0# -> MaybeFin32Nothing#
+  _ -> MaybeFin32# (Exts.subInt32# x (Exts.intToInt32# 1# ))
 
 {- | Convert an Int to a finite number, testing that it is
 less than the upper bound. This crashes with an uncatchable
@@ -685,3 +719,6 @@ substitute# _ (Fin# x) = Fin# x
 
 greatest# :: Nat# n -> Fin# (n + 1)
 greatest# (Nat# i) = Fin# i
+
+greatest32# :: (n <# 2147483648) -> Nat# n -> Fin32# (n + 1)
+greatest32# _ (Nat# i) = Fin32# (Exts.intToInt32# i)

@@ -15,6 +15,7 @@ module Arithmetic.Unsafe
   , Nat# (..)
   , Fin# (..)
   , MaybeFin# (..)
+  , MaybeFin32# (..)
   , EitherFin# (..)
   , Fin32# (..)
   , type (<#) (Lt#)
@@ -71,6 +72,9 @@ one to mean Nothing.
 -}
 newtype MaybeFin# :: GHC.Nat -> TYPE 'IntRep where
   MaybeFin# :: Int# -> MaybeFin# n
+
+newtype MaybeFin32# :: GHC.Nat -> TYPE 'Int32Rep where
+  MaybeFin32# :: Int32# -> MaybeFin32# n
 
 type role MaybeFin# nominal
 

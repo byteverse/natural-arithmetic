@@ -25,6 +25,8 @@ module Arithmetic.Nat
     -- * Successor
   , succ
   , succ#
+    -- * Predecessor
+  , withPred#
 
     -- * Compare
   , testEqual
@@ -74,6 +76,8 @@ module Arithmetic.Nat
   , pattern N4096#
   , pattern N8192#
   , pattern N16384#
+  , pattern N32768#
+  , pattern N65536#
 
     -- * Convert
   , demote
@@ -94,7 +98,7 @@ import Arithmetic.Unsafe (Nat (Nat), Nat# (Nat#), (:=:) (Eq), (:=:#) (Eq#), type
 import Arithmetic.Unsafe (type (<=#) (Lte#))
 import Data.Either.Void (EitherVoid#, pattern LeftVoid#, pattern RightVoid#)
 import Data.Maybe.Void (MaybeVoid#, pattern JustVoid#, pattern NothingVoid#)
-import GHC.Exts (Int#, Proxy#, proxy#, (+#), (<#), (==#))
+import GHC.Exts (Int#, Proxy#, proxy#, (+#), (<#), (==#), (-#))
 import GHC.Int (Int (I#))
 import GHC.TypeNats (Div, KnownNat, natVal', type (+), type (-))
 
@@ -218,6 +222,15 @@ succ n = plus n one
 succ# :: Nat# a -> Nat# (a + 1)
 {-# INLINE succ# #-}
 succ# n = plus# n (one# (# #))
+
+-- | If a natural number is greater than zero, we can operate on its
+-- predecessor.
+withPred# ::
+     Nat# a
+  -> (0 <# a)
+  -> (forall b. Nat# b -> (a :=:# b + 1) -> t)
+  -> t
+withPred# (Nat# i) _ f = f (Nat# (i -# 1#)) (Eq# (# #))
 
 -- | Subtract the second argument from the first argument.
 monus :: Nat a -> Nat b -> Maybe (Difference a b)
@@ -361,6 +374,12 @@ pattern N8192# = Nat# 8192#
 
 pattern N16384# :: Nat# 16384
 pattern N16384# = Nat# 16384#
+
+pattern N32768# :: Nat# 32768
+pattern N32768# = Nat# 32768#
+
+pattern N65536# :: Nat# 65536
+pattern N65536# = Nat# 65536#
 
 substitute# :: (m :=:# n) -> Nat# m -> Nat# n
 substitute# _ (Nat# x) = Nat# x

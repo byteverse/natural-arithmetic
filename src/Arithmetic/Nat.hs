@@ -98,7 +98,7 @@ import Arithmetic.Unsafe (Nat (Nat), Nat# (Nat#), (:=:) (Eq), (:=:#) (Eq#), type
 import Arithmetic.Unsafe (type (<=#) (Lte#))
 import Data.Either.Void (EitherVoid#, pattern LeftVoid#, pattern RightVoid#)
 import Data.Maybe.Void (MaybeVoid#, pattern JustVoid#, pattern NothingVoid#)
-import GHC.Exts (Int#, Proxy#, proxy#, (+#), (<#), (==#), (-#))
+import GHC.Exts (Int#, Proxy#, proxy#, (+#), (<#), (==#), (-#), (<=#))
 import GHC.Int (Int (I#))
 import GHC.TypeNats (Div, KnownNat, natVal', type (+), type (-))
 
@@ -155,7 +155,7 @@ testLessThanEqual (Nat x) (Nat y) =
 
 testLessThanEqual# :: Nat# a -> Nat# b -> MaybeVoid# (a <=# b)
 {-# INLINE testLessThanEqual# #-}
-testLessThanEqual# (Nat# x) (Nat# y) = case x <# y of
+testLessThanEqual# (Nat# x) (Nat# y) = case x <=# y of
   0# -> NothingVoid#
   _ -> JustVoid# (Lte# (# #))
 
